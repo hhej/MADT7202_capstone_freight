@@ -193,6 +193,7 @@ footer a { color: var(--cyan); }
 
 <footer>
   <div>Data: OTP truck freight data (otp_69_01), Jan–Apr 2026, 7 farm and food goods; 2025 used as a check. Province totals only, no personal data.</div>
+  <div>Country borders: Natural Earth (public domain) via world-atlas.</div>
   <div>Code, notebook, results and stress tests: <a href="https://github.com/hhej/MADT7202_capstone_freight" target="_blank" rel="noopener">github.com/hhej/MADT7202_capstone_freight</a></div>
 </footer>
 </div>
@@ -225,14 +226,27 @@ const totalTrips = () => T.reduce((a, r) => a + r.reduce((x, y) => x + y, 0), 0)
 // ---------------------------------------------------------------- map
 const svg = d3.select('#map'), VW = 640, VH = 800;
 svg.attr('viewBox', `0 0 ${VW} ${VH}`);
-const root = svg.append('g'), gHull = root.append('g').attr('filter', 'url(#soft)'), gRings = root.append('g'), gFlows = root.append('g'), gNodes = root.append('g'), gLabels = root.append('g');
+const root = svg.append('g'), gLand = root.append('g'), gHull = root.append('g').attr('filter', 'url(#soft)'), gRings = root.append('g'), gFlows = root.append('g'), gNodes = root.append('g'), gLabels = root.append('g');
 svg.append('defs').append('filter').attr('id', 'soft').attr('x', '-30%').attr('y', '-30%').attr('width', '160%').attr('height', '160%').append('feGaussianBlur').attr('stdDeviation', 16);
 svg.select('defs').append('marker').attr('id', 'arw').attr('viewBox', '0 -4 8 8').attr('refX', 7).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
   .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#37E2D5');
 let zt = d3.zoomIdentity;
 const zoomer = d3.zoom().scaleExtent([.7, 6]).on('zoom', e => { zt = e.transform; root.attr('transform', zt); sizeKey(); });
 svg.call(zoomer);
-const proj = d3.geoMercator().fitExtent([[30, 20], [VW - 30, VH - 20]], { type: 'MultiPoint', coordinates: nodes.map(n => [n.lng, n.lat]) });
+const THAI = DATA.outline.features.find(f => f.properties.name === 'Thailand');
+const proj = d3.geoMercator().fitExtent([[24, 18], [VW - 24, VH - 18]], THAI);
+const geoPath = d3.geoPath(proj);
+// country silhouette (real borders, Natural Earth); neighbours faint for context
+const landGrad = svg.select('defs').append('linearGradient').attr('id', 'land').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', 1);
+landGrad.append('stop').attr('offset', 0).attr('stop-color', '#37E2D5').attr('stop-opacity', .13);
+landGrad.append('stop').attr('offset', 1).attr('stop-color', '#2350C8').attr('stop-opacity', .08);
+gLand.selectAll('path.nb').data(DATA.outline.features.filter(f => f !== THAI)).join('path').attr('class', 'nb').attr('d', geoPath)
+  .attr('fill', 'rgba(255,255,255,.025)').attr('stroke', 'rgba(157,183,201,.22)').attr('stroke-width', .7);
+gLand.append('path').datum(THAI).attr('d', geoPath).attr('fill', 'rgba(55,226,213,.10)').attr('filter', 'url(#soft)');
+gLand.append('path').datum(THAI).attr('d', geoPath).attr('fill', 'url(#land)').attr('stroke', 'rgba(55,226,213,.55)').attr('stroke-width', 1.2).attr('stroke-linejoin', 'round');
+const place = [['MYANMAR', 97.6, 18.9], ['LAOS', 103.4, 19.3], ['CAMBODIA', 104.6, 12.9], ['MALAYSIA', 101.9, 5.9], ['VIETNAM', 106.2, 15.9], ['Andaman Sea', 97.4, 9.6], ['Gulf of Thailand', 101.2, 10.6]];
+gLand.selectAll('text.place').data(place).join('text').attr('class', 'place').attr('x', d => proj([d[1], d[2]])[0]).attr('y', d => proj([d[1], d[2]])[1])
+  .attr('text-anchor', 'middle').attr('fill', 'rgba(157,183,201,.42)').style('font', d => (d[0] === d[0].toUpperCase() ? '600 11px var(--body)' : 'italic 11px var(--body)')).style('letter-spacing', d => (d[0] === d[0].toUpperCase() ? '.22em' : '0')).text(d => d[0]);
 const geoPos = nodes.map(n => proj([n.lng, n.lat]));
 let netPos = null;
 function networkPositions() {
@@ -261,6 +275,7 @@ const confColor = d3.scaleLinear([0.35, 0.8, 1], ['#FF6B6B', '#FFD166', '#A3E635
 
 function drawMap() {
   const p = pos(), cov = S.hubs.length ? Calc.covered(S.hubs, A) : null;
+  gLand.transition().duration(500).attr('opacity', S.layout === 'geo' ? 1 : 0);
   const o = outT(), inn = inT(), size = S.sizeBy === 'out' ? o : S.sizeBy === 'in' ? inn : o.map((v, i) => v + inn[i]);
   const r = d3.scaleSqrt([0, d3.max(size)], [3, 26]);
   // reach rings (map layout only: they are distances)

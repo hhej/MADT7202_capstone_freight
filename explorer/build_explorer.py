@@ -71,6 +71,7 @@ DATA_OUT = dict(
  null_weight=rd('null.csv').null_Q.round(4).tolist(), null_topo=rd('null_course.csv').topology_only_Q.round(4).tolist(),
  road=rd('road_calibration.csv', index_col=0)['value'].to_dict(), stress=stress, facts=json.loads((ROOT / 'deck' / 'facts.json').read_text()),
  audit=recs(rd('audit.csv')), cq=cq, months=int(d.month.nunique()),
+ outline=json.loads((EXP / 'thailand_outline.json').read_text()),  # Natural Earth borders, see make_outline.py
  obs_topo=stress['2_check2_1000']['observed_Q'], obs_Q=json.loads((RES / 'summary.json').read_text())['observed_Q'],
 )
 blob = json.dumps(DATA_OUT, ensure_ascii=False, separators=(',', ':'))
