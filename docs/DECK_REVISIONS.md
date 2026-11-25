@@ -39,3 +39,17 @@ All numbers below come from `Freight_Capstone_TH.ipynb` §11 and the listed `res
 
 ## Unchanged and verified
 990,030 trips · A₂ 66.4% · A₃ 82.3% (unique optimum by brute force) · +15.9 pts · ≈204k trips/month · B₃ 80.1% (−2.2) · weakest group 47.5% → 57.0% · West & South 47.5% → 92.2% · Suphanburi/Lopburi example · 87% sum of singles · group sizes 29/12/14/22 and shares 37/34/15/14%.
+
+## New slide: Graph database (Neo4j + Cypher), from `Freight_GraphDB_Neo4j.ipynb`
+Use it on or after slide 19. Why a graph DB fits here: the questions are multi-hop (hub → pickup province → destination → hub).
+
+| Question (Cypher) | Answer |
+|---|---|
+| Return-load lanes (both ends near a hub) | 75.5% of trips. Saraburi↔Saraburi area 348k; Phitsanulok→Saraburi area 124k; Maha Sarakham→Saraburi area 96k |
+| Where trucks end up (sell return loads there) | Saraburi area → Chonburi 67k, Ayutthaya 49k; Maha Sarakham area → Chonburi 41k; Phitsanulok area → Ayutthaya 22k. All top destinations are near one of our hubs |
+| Molasses lanes (tanker trucks) | Largest: Nakhon Sawan→Ang Thong 4.7k (Phitsanulok area) |
+| 4th-hub candidates (unreached origins) | Ubon Ratchathani 35k, Kanchanaburi 25k, Loei 20k, Ratchaburi 17k |
+| Export lanes to the ports | Korat→Chonburi 22k, Sa Kaeo→Chonburi 13k, Surin→Chonburi 9.7k |
+
+Check: the database totals equal the notebook totals (990,030 trips; lane coverage 75.48%).
+AI vs human: AI drafted the schema and the Cypher; the team verified every query against the notebook.
