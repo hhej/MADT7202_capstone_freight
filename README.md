@@ -49,6 +49,14 @@ AI ช่วยสร้างโค้ด อธิบาย และจัด
 
 ## เปิดบน Colab
 
-[Open in Colab](https://colab.research.google.com/github/Pornphrom/MADT7202_capstone_freight/blob/main/Freight_Capstone_TH.ipynb)
+[Open in Colab](https://colab.research.google.com/github/hhej/MADT7202_capstone_freight/blob/main/Freight_Capstone_TH.ipynb)
 
 รันเซลล์เตรียมข้อมูลสำหรับ GitHub/Colab ก่อนเริ่มวิเคราะห์ ระบบดาวน์โหลด CSV สองปีจาก สนข. โดยตรงและตรวจ SHA-256 กับข้อมูลที่ใช้ทดสอบ ไม่เก็บ CSV ขนาดใหญ่ไว้ใน Git หากไฟล์ต้นทางเปลี่ยนให้ใช้สำเนาเดิมแทนการข้ามการตรวจ hash
+
+## สไลด์ การทดสอบ และ Neo4j
+
+- `deck/Hub_Location_Study_MADT7202.pptx`: สไลด์นำเสนอ (นำเข้า Canva ได้: Create a design → Import file) สคริปต์ภาษาไทยอยู่ใน speaker notes ลำดับผู้พูดและคำถามที่คาดว่าจะโดนถามอยู่ใน `deck/PRESENTER_GUIDE.md`
+- สร้างสไลด์ใหม่จากผลล่าสุด: `python deck/build_deck.py` แล้วตรวจด้วย `python deck/lint_deck.py` (ไม่มีคำฟุ่มเฟือย ทุกตัวเลขมาจาก `results/` และข้อความไม่ล้นกล่อง)
+- Stress tests: `pytest -q tests/` (ประมาณ 7 นาที) ผลและข้อยกเว้นสรุปใน `docs/STRESS_TEST.md`
+- Neo4j: `Freight_GraphDB_Neo4j.ipynb` ต้องตั้ง `NEO4J_CREDENTIALS_FILE` ชี้ไฟล์ credentials จาก Aura ที่เก็บไว้นอก repo ห้าม commit ไฟล์นี้
+- ไลบรารีที่ใช้ทดสอบ: `requirements-tested.txt` (เพิ่ม `python-pptx` และ `pytest` สำหรับสไลด์และการทดสอบ)

@@ -6,3 +6,5 @@ matplotlib
 ipykernel
 neo4j
 truststore
+python-pptx
+pytest
