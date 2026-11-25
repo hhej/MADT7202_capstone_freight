@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RES, DATA, ASSETS = ROOT / 'results', ROOT / 'data', ROOT / 'deck' / 'assets'
 CH = ASSETS / 'charts'; CH.mkdir(parents=True, exist_ok=True)
 REPO = 'github.com/hhej/MADT7202_capstone_freight'
+SITE = 'hhej.github.io/MADT7202_capstone_freight'  # interactive explorer (GitHub Pages)
 
 EN = dict(zip('กระบี่ กรุงเทพมหานคร กาญจนบุรี กาฬสินธุ์ กำแพงเพชร ขอนแก่น จันทบุรี ฉะเชิงเทรา ชลบุรี ชัยนาท ชัยภูมิ ชุมพร ตรัง ตราด ตาก นครนายก นครปฐม นครพนม นครราชสีมา นครศรีธรรมราช นครสวรรค์ นนทบุรี นราธิวาส น่าน บึงกาฬ บุรีรัมย์ ปทุมธานี ประจวบคีรีขันธ์ ปราจีนบุรี ปัตตานี พระนครศรีอยุธยา พะเยา พังงา พัทลุง พิจิตร พิษณุโลก ภูเก็ต มหาสารคาม มุกดาหาร ยะลา ยโสธร ระนอง ระยอง ราชบุรี ร้อยเอ็ด ลพบุรี ลำปาง ลำพูน ศรีสะเกษ สกลนคร สงขลา สตูล สมุทรปราการ สมุทรสงคราม สมุทรสาคร สระบุรี สระแก้ว สิงห์บุรี สุพรรณบุรี สุราษฎร์ธานี สุรินทร์ สุโขทัย หนองคาย หนองบัวลำภู อำนาจเจริญ อุดรธานี อุตรดิตถ์ อุทัยธานี อุบลราชธานี อ่างทอง เชียงราย เชียงใหม่ เพชรบุรี เพชรบูรณ์ เลย แพร่ แม่ฮ่องสอน'.split(),
  ['Krabi','Bangkok','Kanchanaburi','Kalasin','Kamphaeng Phet','Khon Kaen','Chanthaburi','Chachoengsao','Chonburi','Chai Nat','Chaiyaphum','Chumphon','Trang','Trat','Tak','Nakhon Nayok','Nakhon Pathom','Nakhon Phanom','Korat','Nakhon Si Thammarat','Nakhon Sawan','Nonthaburi','Narathiwat','Nan','Bueng Kan','Buriram','Pathum Thani','Prachuap Khiri Khan','Prachinburi','Pattani','Ayutthaya','Phayao','Phang Nga','Phatthalung','Phichit','Phitsanulok','Phuket','Maha Sarakham','Mukdahan','Yala','Yasothon','Ranong','Rayong','Ratchaburi','Roi Et','Lopburi','Lampang','Lamphun','Sisaket','Sakon Nakhon','Songkhla','Satun','Samut Prakan','Samut Songkhram','Samut Sakhon','Saraburi','Sa Kaeo','Sing Buri','Suphanburi','Surat Thani','Surin','Sukhothai','Nong Khai','Nong Bua Lamphu','Amnat Charoen','Udon Thani','Uttaradit','Uthai Thani','Ubon Ratchathani','Ang Thong','Chiang Rai','Chiang Mai','Phetchaburi','Phetchabun','Loei','Phrae','Mae Hong Son']))
@@ -508,7 +509,7 @@ text(s, 7.8, 9.35, 11.38, 1.0, 'AI was not used as a source of market facts.', 1
 s = prs.slides.add_slide(BLANK); PAGE[0] += 1
 s.shapes.add_picture(str(ASSETS / 'photo_thanks.jpg'), 0, 0, Inches(20), Inches(11.25)); shape(s, 0, 0, 20, 11.25, '1E1D26', alpha=.6); header(s)
 text(s, 1.35, 3.6, 17, 2, 'THANK YOU', 110, WHITE, True); text(s, 1.4, 5.9, 17, .8, 'Questions welcome', 30, TANC, True)
-text(s, 1.4, 6.8, 17, .6, REPO, 20, 'E6E6EA')
+text(s, 1.4, 6.8, 17, 1.2, [f'Interactive explorer: {SITE}', f'Code and results: {REPO}'], 20, 'E6E6EA')
 NOTES[PAGE[0]] = '[ณัฏฐา · 0:10] ขอบคุณค่ะ โค้ดและผลทั้งหมดอยู่ใน GitHub ตามลิงก์ ยินดีรับคำถามค่ะ (คำถามเทคนิคส่งให้ปัญจพล)'
 
 # ------------------------------------------------------------------ appendix
@@ -541,7 +542,7 @@ text(s, .83, 3.3, 18.35, 7, ['Monthly checks look back at data we used; they are
 s = chrome('References', 'Data, Code, Methods and Photos', None, None, 'ภาคผนวก')
 text(s, .83, 2.6, 18.35, 7.8, [[('Data', {'bold': True, 'color': TANC})], 'OTP truck freight data (otp_69_01): otp.gdcatalog.go.th/dataset/91038df9-854e-442d-8408-c54032daf506',
  'Province coordinates: data.go.th/dataset/d41ab000-c49c-4e14-963c-cc062e314076', 'Bangkok factory locations: industry.gdcatalog.go.th/dataset/a4e85b60-3fd5-4c50-9450-5e139cb1b0e1',
- [('Code and results', {'bold': True, 'color': TANC})], REPO, [('Methods', {'bold': True, 'color': TANC})],
+ [('Code, results and interactive explorer', {'bold': True, 'color': TANC})], REPO + '   ·   ' + SITE, [('Methods', {'bold': True, 'color': TANC})],
  'Church & ReVelle (1974) maximal covering location · Blondel et al. (2008) Louvain · Traag et al. (2019) Leiden · Newman (2006) modularity · Kempe et al. (2003) seed selection',
  [('Photos (Wikimedia Commons)', {'bold': True, 'color': TANC})], 'Ilya Plekhanov (CC BY-SA 4.0); Marshall Astor (CC BY-SA 2.0); CIAT (CC BY-SA 2.0); Soulful sunshine (CC BY-SA 4.0); Eerin25 (CC0); Per Meistrup (CC BY-SA 4.0); Chatchai Jomta (CC BY 3.0)'], 17, 'E6E6EA', after=8)
 

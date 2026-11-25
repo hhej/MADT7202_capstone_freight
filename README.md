@@ -53,6 +53,10 @@ AI ช่วยสร้างโค้ด อธิบาย และจัด
 
 รันเซลล์เตรียมข้อมูลสำหรับ GitHub/Colab ก่อนเริ่มวิเคราะห์ ระบบดาวน์โหลด CSV สองปีจาก สนข. โดยตรงและตรวจ SHA-256 กับข้อมูลที่ใช้ทดสอบ ไม่เก็บ CSV ขนาดใหญ่ไว้ใน Git หากไฟล์ต้นทางเปลี่ยนให้ใช้สำเนาเดิมแทนการข้ามการตรวจ hash
 
+## Interactive explorer
+
+เปิดดูแบบคลิกเล่นได้ที่ **https://hhej.github.io/MADT7202_capstone_freight/** (หรือดับเบิลคลิก `explorer/index.html` ในเครื่องได้ ต้องต่ออินเทอร์เน็ตเพื่อโหลด D3 และฟอนต์) มีโหมด Story 12 ขั้นสำหรับเล่าเรื่องแทนสไลด์ และโหมด Explore สำหรับลองวางฐานเอง เปลี่ยนรัศมี ตัดสินค้า และดูผลทุกส่วน สร้างใหม่ด้วย `python explorer/build_explorer.py` และตรวจการคำนวณด้วย `node explorer/test_calc.mjs`
+
 ## สไลด์ การทดสอบ และ Neo4j
 
 - `deck/Hub_Location_Study_MADT7202.pptx`: สไลด์นำเสนอ (นำเข้า Canva ได้: Create a design → Import file) สคริปต์ภาษาไทยอยู่ใน `deck/SCRIPT_TH.md` ลำดับผู้พูดและคำถามที่คาดว่าจะโดนถามอยู่ใน `deck/PRESENTER_GUIDE.md`
