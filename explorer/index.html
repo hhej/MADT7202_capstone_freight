@@ -6,109 +6,139 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sarabun:wght@400;600&display=swap">
 <style>
-/* Layout: map on the left, a working panel on the right; findings tabs below. One dark look, taken from the team deck. */
+/* Layout: glass map stage on the left, glass working panel on the right, findings below. Deep ocean night palette. */
 :root {
-  --bg: #26252F; --card: #34333F; --card-2: #2D2C36; --line: #4A4955; --fg: #F2F1EE; --muted: #ABAAB6;
-  --tan: #C8955A; --tan-ink: #26252F; --orange: #E8673A; --good: #5FB98A; --warn: #E0B341;
-  --display: 'Archivo', 'Arial Black', Arial, sans-serif; --body: 'Inter', 'Helvetica Neue', Arial, sans-serif; --thai: 'Sarabun', 'Tahoma', sans-serif;
+  --bg1: #071B2E; --bg2: #0B3B4F; --glass: rgba(255,255,255,.075); --glass-2: rgba(255,255,255,.045); --glass-hi: rgba(255,255,255,.14);
+  --border: rgba(255,255,255,.15); --fg: #EAF6FF; --muted: #9DB7C9; --cyan: #37E2D5; --amber: #FFB547; --coral: #FF6B6B; --lime: #A3E635; --ink: #04202C;
+  --display: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif; --body: 'Plus Jakarta Sans', 'Segoe UI', 'Helvetica Neue', sans-serif; --thai: 'Sarabun', 'Tahoma', sans-serif;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html, body { background: var(--bg); color: var(--fg); }
-body { font: 15px/1.5 var(--body); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 40px; }
-.wrap { max-width: 1440px; margin: 0 auto; }
+html { background: radial-gradient(1100px 700px at 8% -8%, #0F4C6B 0%, transparent 60%), radial-gradient(900px 700px at 100% 100%, #123D73 0%, transparent 55%), linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 100%) fixed; color: var(--fg); }
+body { margin: 0; background: transparent; color: var(--fg); font: 15px/1.55 var(--body); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 40px; min-height: 100vh; }
+.orbs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.orbs i { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .32; animation: drift 40s ease-in-out infinite alternate; }
+.orbs i:nth-child(1) { width: 48vmax; height: 48vmax; background: #1FB5C9; top: -20vmax; left: -12vmax; }
+.orbs i:nth-child(2) { width: 52vmax; height: 52vmax; background: #2350C8; bottom: -26vmax; right: -14vmax; animation-duration: 52s; }
+.orbs i:nth-child(3) { width: 30vmax; height: 30vmax; background: #FFB547; top: 32%; left: 42%; opacity: .12; animation-duration: 60s; }
+@keyframes drift { to { transform: translate(9vmax, 7vmax) scale(1.12); } }
+.wrap { position: relative; z-index: 1; max-width: 1480px; margin: 0 auto; }
 h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(24px, 3.2vw, 38px); font-weight: 800; letter-spacing: -.01em; }
-h2 { font-size: 22px; font-weight: 800; }
-h3 { font-size: 16px; font-weight: 600; color: var(--tan); }
+h1 { font-size: clamp(22px, 2.8vw, 34px); font-weight: 700; letter-spacing: -.02em; background: linear-gradient(90deg, #FFFFFF, #BFF6F1 60%, #FFE0A8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+h2 { font-size: 21px; font-weight: 700; letter-spacing: -.01em; }
+h3 { font-size: 15px; font-weight: 600; color: var(--cyan); }
 p { margin: 0; }
-.eyebrow { display: flex; align-items: center; gap: 10px; font: 700 12px/1 var(--body); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-.eyebrow::before { content: ""; width: 12px; height: 12px; background: var(--tan); }
-.label { font: 700 12px/1.2 var(--body); letter-spacing: .07em; text-transform: uppercase; color: var(--tan); }
+.eyebrow { display: flex; align-items: center; gap: 10px; font: 600 11.5px/1 var(--body); letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.eyebrow::before { content: ""; width: 9px; height: 9px; border-radius: 3px; background: linear-gradient(135deg, var(--cyan), var(--amber)); box-shadow: 0 0 12px var(--cyan); }
+.label { font: 700 11.5px/1.2 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--cyan); }
 .muted { color: var(--muted); }
 .thai { font-family: var(--thai); }
-button, select, input { font: inherit; color: inherit; }
-button { cursor: pointer; border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 7px 12px; }
-button:hover { border-color: var(--tan); }
-button.primary { background: var(--tan); color: var(--tan-ink); border-color: var(--tan); font-weight: 700; }
-button[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--tan); color: var(--tan-ink); border-color: var(--tan); font-weight: 600; }
-:focus-visible { outline: 2px solid var(--tan); outline-offset: 2px; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.seg button { border: 0; border-radius: 0; background: transparent; padding: 6px 11px; }
 .num { font-variant-numeric: tabular-nums; }
+.glass, .card { background: var(--glass); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 18px 50px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.14); }
+.card { padding: 18px; min-width: 0; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 1px solid var(--border); background: var(--glass-2); border-radius: 12px; padding: 7px 13px; transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s; }
+button:hover { transform: translateY(-1px); border-color: rgba(55,226,213,.6); box-shadow: 0 6px 20px rgba(55,226,213,.15); }
+button.primary { background: linear-gradient(135deg, #37E2D5, #22A6C9); color: var(--ink); border-color: transparent; font-weight: 700; box-shadow: 0 8px 24px rgba(55,226,213,.28); }
+button[aria-pressed="true"] { background: linear-gradient(135deg, rgba(55,226,213,.95), rgba(34,166,201,.95)); color: var(--ink); border-color: transparent; font-weight: 700; }
+select { background: var(--glass-2); border: 1px solid var(--border); border-radius: 10px; padding: 5px 8px; }
+select option { background: #0B2A40; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; box-shadow: 0 0 0 5px rgba(55,226,213,.2); }
+.seg { display: inline-flex; padding: 3px; gap: 3px; border: 1px solid var(--border); border-radius: 13px; background: rgba(0,0,0,.18); }
+.seg button { border: 0; border-radius: 10px; background: transparent; padding: 6px 12px; }
+.seg button:hover { transform: none; box-shadow: none; background: var(--glass-hi); }
+.seg button[aria-pressed="true"] { background: linear-gradient(135deg, #37E2D5, #22A6C9); color: var(--ink); font-weight: 700; box-shadow: 0 4px 14px rgba(55,226,213,.3); }
 
-header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 14px 12px; border-bottom: 1px solid var(--line); }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
-.top .row { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; justify-content: space-between; }
-.top .titles { display: grid; gap: 6px; min-width: 0; }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 12px max(16px, env(safe-area-inset-left, 0px)); background: rgba(7,27,46,.55); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg1); }
+.top .row { max-width: 1480px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; }
+.top .titles { display: grid; gap: 5px; min-width: 0; }
+.kpis { display: flex; flex-wrap: wrap; gap: 8px; }
+.kpi { padding: 6px 12px; border-radius: 14px; background: var(--glass-2); border: 1px solid var(--border); display: grid; line-height: 1.15; min-width: 104px; }
+.kpi b { font: 700 18px/1.15 var(--display); color: var(--amber); }
+.kpi span { font-size: 11px; color: var(--muted); }
 
-.layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; margin-top: 16px; align-items: start; }
-@media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } }
-.card { background: var(--card); border-radius: 12px; padding: 16px; min-width: 0; }
-.mapcard { padding: 10px; display: grid; gap: 8px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 410px; gap: 18px; margin-top: 18px; align-items: start; }
+@media (max-width: 1000px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.mapcard { padding: 12px; display: grid; gap: 10px; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 13px; }
 .toolbar label { display: inline-flex; gap: 6px; align-items: center; }
-#map { width: 100%; height: min(78vh, 820px); min-height: 420px; display: block; background: var(--card-2); border-radius: 10px; touch-action: none; }
+.stage { position: relative; border-radius: 16px; overflow: hidden; background: radial-gradient(70% 60% at 50% 40%, rgba(55,226,213,.08), transparent 70%), rgba(2,14,26,.45); border: 1px solid rgba(255,255,255,.08); }
+#flowcv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#map { position: relative; z-index: 1; width: 100%; height: min(76vh, 820px); min-height: 420px; display: block; touch-action: none; }
+.sizekey { position: absolute; left: 12px; bottom: 12px; z-index: 2; padding: 10px 12px; border-radius: 14px; font-size: 11.5px; color: var(--muted); max-width: 230px; display: grid; gap: 6px; }
+.sizekey svg text { fill: var(--fg); font: 600 10.5px var(--body); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); }
-.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; box-shadow: 0 0 10px currentColor; }
 
-aside.panel { display: grid; gap: 12px; align-content: start; }
+aside.panel { display: grid; gap: 14px; align-content: start; }
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-.tabs button { padding: 6px 12px; }
-.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.metric { background: var(--card-2); border-radius: 10px; padding: 10px 12px; }
-.metric b { display: block; font: 800 26px/1.1 var(--display); color: var(--tan); }
-.metric span { font-size: 12.5px; color: var(--muted); }
+.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.metric { background: var(--glass-2); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 11px 13px; }
+.metric b { display: block; font: 700 25px/1.1 var(--display); color: var(--amber); text-shadow: 0 0 24px rgba(255,181,71,.25); }
+.metric span { font-size: 12px; color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { display: inline-flex; gap: 6px; align-items: center; padding: 3px 4px 3px 10px; border-radius: 999px; background: var(--card-2); border: 1px solid var(--line); font-size: 13px; }
+.chip { display: inline-flex; gap: 6px; align-items: center; padding: 3px 4px 3px 11px; border-radius: 999px; background: var(--glass-2); border: 1px solid var(--border); font-size: 13px; animation: pop .35s ease-out; }
 .chip button { padding: 0 7px; border: 0; background: transparent; color: var(--muted); }
-.chip.hub { border-color: var(--tan); }
+.chip.hub { border-color: rgba(255,181,71,.7); box-shadow: 0 0 16px rgba(255,181,71,.18); }
+@keyframes pop { from { transform: scale(.8); opacity: 0; } }
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .row2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.stack { display: grid; gap: 10px; }
-input[type=range] { width: 100%; accent-color: var(--tan); }
+.stack { display: grid; gap: 12px; }
+input[type=range] { width: 100%; accent-color: var(--cyan); }
 .prodlist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 10px; font-size: 13px; }
-.bars { display: grid; gap: 7px; }
-.bar { display: grid; grid-template-columns: 120px minmax(0, 1fr) 54px; gap: 8px; align-items: center; font-size: 13px; }
-.bar .track { position: relative; height: 12px; background: var(--card-2); border-radius: 6px; overflow: hidden; }
-.bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 6px; }
-.bar .mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--fg); opacity: .5; }
-.note { font-size: 13px; color: var(--muted); }
-.flag { color: var(--warn); }
-.hint { font-size: 12.5px; color: var(--muted); border-left: 3px solid var(--tan); padding-left: 10px; }
+input[type=checkbox] { accent-color: var(--cyan); }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 124px minmax(0, 1fr) 56px; gap: 8px; align-items: center; font-size: 13px; }
+.bar .track { position: relative; height: 10px; background: rgba(255,255,255,.07); border-radius: 6px; overflow: hidden; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 6px; box-shadow: 0 0 14px currentColor; }
+.fpanel .bar .fill, .story .bar .fill { transform-origin: left; animation: grow .8s cubic-bezier(.2,.8,.2,1); }
+@keyframes grow { from { transform: scaleX(0); } }
+.bar .mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--fg); opacity: .55; }
+.note { font-size: 12.5px; color: var(--muted); }
+.flag { color: var(--coral); }
+.hint { font-size: 12.5px; color: var(--muted); border-left: 2px solid var(--cyan); padding-left: 10px; }
 
-.story { display: grid; gap: 12px; }
+.story { display: grid; gap: 13px; }
 .story .stepnav { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
-.story .dots { display: flex; gap: 5px; flex-wrap: wrap; }
-.story .dots button { width: 12px; height: 12px; padding: 0; border-radius: 50%; background: var(--line); border: 0; }
-.story .dots button[aria-current="step"] { background: var(--tan); }
-.story .body { display: grid; gap: 10px; font-size: 15px; }
+.progress { height: 4px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+.progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--amber)); box-shadow: 0 0 12px var(--cyan); transition: width .5s ease; }
+.story .dots { display: flex; gap: 6px; flex-wrap: wrap; }
+.story .dots button { width: 11px; height: 11px; padding: 0; border-radius: 50%; background: rgba(255,255,255,.18); border: 0; }
+.story .dots button[aria-current="step"] { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+.story .body { display: grid; gap: 10px; font-size: 15px; animation: rise .55s cubic-bezier(.2,.8,.2,1); }
+.story h2 { animation: rise .45s cubic-bezier(.2,.8,.2,1); }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
 .story .body p { max-width: 62ch; }
-.story .big { font: 800 34px/1.05 var(--display); color: var(--tan); }
+.story .big { font: 700 38px/1.05 var(--display); color: var(--amber); text-shadow: 0 0 30px rgba(255,181,71,.35); }
 .story ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 
-section.findings { margin-top: 18px; display: grid; gap: 12px; scroll-margin-top: 110px; }
-.fpanel { display: grid; gap: 14px; }
-.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; }
-.tablewrap { overflow-x: auto; }
+section.findings { margin-top: 20px; display: grid; gap: 14px; scroll-margin-top: 120px; }
+.fpanel { display: grid; gap: 16px; animation: rise .45s ease-out; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.tablewrap { overflow-x: auto; border-radius: 12px; }
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
-th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { color: var(--tan); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; }
+tbody tr:hover { background: rgba(55,226,213,.06); }
+th { color: var(--cyan); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; }
 td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
-.what { background: var(--card-2); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
-.what b { color: var(--tan); }
+.what { background: linear-gradient(135deg, rgba(55,226,213,.09), rgba(255,181,71,.06)); border: 1px solid rgba(55,226,213,.25); border-radius: 14px; padding: 12px 14px; display: grid; gap: 6px; }
+.what b { color: var(--cyan); }
 svg text { fill: var(--muted); font: 12px var(--body); }
-svg .lbl { fill: var(--fg); font: 600 12px var(--body); paint-order: stroke; stroke: var(--card-2); stroke-width: 3px; }
-#tip { position: fixed; pointer-events: none; background: #1D1C24; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; z-index: 20; max-width: 260px; }
+svg .lbl { fill: var(--fg); font: 600 12px var(--body); paint-order: stroke; stroke: rgba(4,20,34,.9); stroke-width: 3.5px; }
+circle.hub { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { stroke-width: 8px; stroke-opacity: .45; } }
+#tip { position: fixed; pointer-events: none; background: rgba(8,30,48,.78); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 12px; padding: 9px 11px; font-size: 12.5px; z-index: 20; max-width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 footer { margin-top: 22px; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
-footer a { color: var(--tan); }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+footer a { color: var(--cyan); }
+@media (prefers-reduced-motion: reduce) { *, *::before { transition: none !important; animation: none !important; } }
 </style>
 
 </head>
 <body>
+<div class="orbs" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="wrap">
 <header class="top">
   <div class="row">
@@ -116,7 +146,14 @@ footer a { color: var(--tan); }
       <div class="eyebrow">Hub location study · MADT 7202</div>
       <h1>Where should we open our first trucking hubs?</h1>
     </div>
+    <div class="kpis" aria-live="polite">
+      <div class="kpi"><b class="num" id="kReach">–</b><span>trips within reach</span></div>
+      <div class="kpi"><b class="num" id="kMonth">–</b><span>trips a month</span></div>
+      <div class="kpi"><b class="num" id="kLane">–</b><span>return-load trips</span></div>
+    </div>
     <div class="row2">
+      <button id="autoplay" aria-pressed="false" title="Advance the story every 12 seconds">▶ Autoplay</button>
+      <button id="fs" title="Full screen">⛶</button>
       <div class="seg" role="group" aria-label="Mode">
         <button id="modeStory" aria-pressed="true">Story</button>
         <button id="modeExplore" aria-pressed="false">Explore</button>
@@ -133,8 +170,14 @@ footer a { color: var(--tan); }
       <label>Colour <select id="colorBy"><option value="g">Market group</option><option value="conf">Group stability</option></select></label>
       <label>Flows <input id="nFlows" type="range" min="0" max="300" step="10" value="60" style="width:110px"><span id="nFlowsV" class="num"></span></label>
       <label><input id="arrows" type="checkbox"> Direction</label>
+      <label><input id="moving" type="checkbox" checked> Moving freight</label>
+      <label><input id="hulls" type="checkbox"> Region glow</label>
     </div>
-    <svg id="map" role="img" aria-label="Map of Thai provinces with freight flows"></svg>
+    <div class="stage">
+      <canvas id="flowcv" aria-hidden="true"></canvas>
+      <svg id="map" role="img" aria-label="Map of Thai provinces with freight flows"></svg>
+      <div class="sizekey glass" id="sizekey"></div>
+    </div>
     <div class="legend" id="legend"></div>
   </div>
   <aside class="panel" id="panel"></aside>
@@ -241,11 +284,12 @@ const DATA = {"nodes":[{"en":"Krabi","th":"กระบี่","lat":8.0579,"lng
 <script>
 (() => {
 const N = DATA.nodes.length, nodes = DATA.nodes, P = DATA.products;
+const GC = ['#37E2D5', '#FFB547', '#A3E635', '#B794F6'];  // market group colours tuned for the dark glass
 const fmt0 = d3.format(','), pct = v => v.toFixed(1) + '%', pct0 = v => Math.round(v) + '%';
 const byEn = en => nodes.findIndex(n => n.en === en);
 const road = DATA.road, minPerKm = road.minutes_median_pairs_130_170km / 150;
 const S = { mode: 'story', layout: 'geo', sizeBy: 'out', colorBy: 'g', nFlows: 60, arrows: false, prod: P.map(() => true), measure: 'trips',
-            radius: 150, hubs: [], sel: null, tab: 'planner', ftab: 'groups', step: 0, laneView: false, focus: [] };
+            radius: 150, hubs: [], sel: null, tab: 'planner', ftab: 'groups', step: 0, laneView: false, focus: [], moving: true, hulls: false, hover: null, auto: false };
 let W, T, A, timers = [];
 const cancel = () => { timers.forEach(clearTimeout); timers = []; };
 const later = (ms, f) => timers.push(setTimeout(f, ms));
@@ -259,10 +303,12 @@ const totalTrips = () => T.reduce((a, r) => a + r.reduce((x, y) => x + y, 0), 0)
 // ---------------------------------------------------------------- map
 const svg = d3.select('#map'), VW = 640, VH = 800;
 svg.attr('viewBox', `0 0 ${VW} ${VH}`);
-const root = svg.append('g'), gRings = root.append('g'), gFlows = root.append('g'), gNodes = root.append('g'), gLabels = root.append('g');
-svg.append('defs').append('marker').attr('id', 'arw').attr('viewBox', '0 -4 8 8').attr('refX', 7).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
-  .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#C8955A');
-const zoomer = d3.zoom().scaleExtent([.7, 6]).on('zoom', e => root.attr('transform', e.transform));
+const root = svg.append('g'), gHull = root.append('g').attr('filter', 'url(#soft)'), gRings = root.append('g'), gFlows = root.append('g'), gNodes = root.append('g'), gLabels = root.append('g');
+svg.append('defs').append('filter').attr('id', 'soft').attr('x', '-30%').attr('y', '-30%').attr('width', '160%').attr('height', '160%').append('feGaussianBlur').attr('stdDeviation', 16);
+svg.select('defs').append('marker').attr('id', 'arw').attr('viewBox', '0 -4 8 8').attr('refX', 7).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+  .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#37E2D5');
+let zt = d3.zoomIdentity;
+const zoomer = d3.zoom().scaleExtent([.7, 6]).on('zoom', e => { zt = e.transform; root.attr('transform', zt); sizeKey(); });
 svg.call(zoomer);
 const proj = d3.geoMercator().fitExtent([[30, 20], [VW - 30, VH - 20]], { type: 'MultiPoint', coordinates: nodes.map(n => [n.lng, n.lat]) });
 const geoPos = nodes.map(n => proj([n.lng, n.lat]));
@@ -289,7 +335,7 @@ function frame() {  // open the map on the busy part of the country; the far sou
   const k = Math.min(VW / (xs[1] - xs[0] + 90), VH / (ys[1] - ys[0] + 90)), cx = (xs[0] + xs[1]) / 2, cy = (ys[0] + ys[1]) / 2;
   svg.transition().duration(500).call(zoomer.transform, d3.zoomIdentity.translate(VW / 2 - k * cx, VH / 2 - k * cy).scale(k));
 }
-const confColor = d3.scaleLinear([0.35, 0.8, 1], ['#E8673A', '#E0B341', '#5FB98A']).clamp(true);
+const confColor = d3.scaleLinear([0.35, 0.8, 1], ['#FF6B6B', '#FFD166', '#A3E635']).clamp(true);
 
 function drawMap() {
   const p = pos(), cov = S.hubs.length ? Calc.covered(S.hubs, A) : null;
@@ -300,8 +346,8 @@ function drawMap() {
     const n = nodes[h], c = proj([n.lng, n.lat]), pn = proj([n.lng, n.lat + S.radius / 111]), pe = proj([n.lng + S.radius / (111 * Math.cos(n.lat * Math.PI / 180)), n.lat]);
     return { h, cx: c[0], cy: c[1], rx: Math.abs(pe[0] - c[0]), ry: Math.abs(pn[1] - c[1]) };
   }) : [];
-  gRings.selectAll('ellipse').data(rings, d => d.h).join('ellipse').attr('fill', 'rgba(200,149,90,.07)').attr('stroke', '#C8955A').attr('stroke-width', 1.5)
-    .transition().duration(400).attr('cx', d => d.cx).attr('cy', d => d.cy).attr('rx', d => d.rx).attr('ry', d => d.ry);
+  gRings.selectAll('ellipse').data(rings, d => d.h).join(en => en.append('ellipse').attr('cx', d => d.cx).attr('cy', d => d.cy).attr('rx', 0).attr('ry', 0)).attr('fill', 'rgba(255,181,71,.07)').attr('stroke', '#FFB547').attr('stroke-width', 1.5)
+    .transition().duration(800).ease(d3.easeCubicOut).attr('cx', d => d.cx).attr('cy', d => d.cy).attr('rx', d => d.rx).attr('ry', d => d.ry);
   // flows
   let fl = [];
   if (S.arrows) { for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (T[i][j] > 0) fl.push({ i, j, v: T[i][j] }); }
@@ -311,7 +357,7 @@ function drawMap() {
   const laneOn = S.laneView && cov;
   gFlows.selectAll('path').data(fl, d => d.i + '-' + d.j + (S.arrows ? 'd' : 'u')).join('path').attr('fill', 'none')
     .attr('marker-end', S.arrows ? 'url(#arw)' : null)
-    .attr('stroke', d => laneOn ? (cov[d.i] && cov[d.j] ? '#C8955A' : '#6B6A75') : '#8C8B96')
+    .attr('stroke', d => laneOn ? (cov[d.i] && cov[d.j] ? '#37E2D5' : '#4C6A80') : '#7F9AAE')
     .attr('stroke-opacity', d => laneOn ? (cov[d.i] && cov[d.j] ? .8 : .18) : .35)
     .attr('stroke-width', d => fw(d.v))
     .attr('d', d => {
@@ -324,22 +370,71 @@ function drawMap() {
   // nodes
   const fade = i => (cov && !cov[i] ? .25 : S.focus.length && !S.focus.includes(i) ? .35 : 1);
   gNodes.selectAll('circle').data(nodes.map((n, i) => i), i => i).join(en => en.append('circle').attr('cx', i => p[i][0]).attr('cy', i => p[i][1])
-      .on('mousemove', (e, i) => tip(e, i)).on('mouseleave', () => (tipEl.hidden = true)).on('click', (e, i) => clickNode(i))
+      .on('mousemove', (e, i) => tip(e, i)).on('mouseenter', (e, i) => { S.hover = i; applyHover(); }).on('mouseleave', () => { tipEl.hidden = true; S.hover = null; applyHover(); }).on('click', (e, i) => clickNode(i))
       .attr('tabindex', 0).attr('role', 'button').attr('aria-label', i => nodes[i].en).on('keydown', (e, i) => { if (e.key === 'Enter') clickNode(i); }))
-    .attr('fill', i => (S.colorBy === 'g' ? DATA.gcol[nodes[i].g] : confColor(nodes[i].conf)))
-    .attr('stroke', i => (S.hubs.includes(i) ? '#FFFFFF' : i === S.sel ? '#C8955A' : '#26252F')).attr('stroke-width', i => (S.hubs.includes(i) || i === S.sel ? 3 : 1))
-    .style('cursor', 'pointer')
+    .attr('fill', i => (S.colorBy === 'g' ? GC[nodes[i].g] : confColor(nodes[i].conf)))
+    .attr('stroke', i => (S.hubs.includes(i) ? '#FFB547' : i === S.sel ? '#37E2D5' : 'rgba(4,20,34,.9)')).attr('stroke-width', i => (S.hubs.includes(i) || i === S.sel ? 3 : 1))
+    .attr('class', i => (S.hubs.includes(i) ? 'hub' : null)).style('cursor', 'pointer')
     .transition().duration(500).attr('cx', i => p[i][0]).attr('cy', i => p[i][1]).attr('r', i => r(size[i])).attr('opacity', fade);
   // labels: hubs, selection, story focus
   const lab = [...new Set([...S.hubs, ...(S.sel != null ? [S.sel] : []), ...S.focus])];
   gLabels.selectAll('text').data(lab, i => i).join('text').attr('class', 'lbl').text(i => (S.hubs.includes(i) ? '★ ' : '') + nodes[i].en)
     .transition().duration(500).attr('x', i => p[i][0] + 10).attr('y', i => p[i][1] - 10);
-  legend();
+  // region glow: blurred hull around each market group
+  const hulls = S.hulls ? d3.range(4).map(g => ({ g, h: d3.polygonHull(nodes.map((n, i) => (n.g === g ? p[i] : null)).filter(Boolean)) })).filter(d => d.h) : [];
+  gHull.selectAll('path').data(hulls, d => d.g).join('path').attr('fill', d => GC[d.g]).attr('opacity', .16).attr('d', d => 'M' + d.h.join('L') + 'Z');
+  // moving freight: directed top flows, drawn on the canvas below the map
+  let dfl = []; for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (T[i][j] > 0) dfl.push({ i, j, v: T[i][j] });
+  dfl.sort((a, b) => b.v - a.v); setParticles(dfl.slice(0, Math.max(S.nFlows, 30)), cov);
+  SIZE = { r, size, label: document.getElementById('sizeBy').selectedOptions[0].text.toLowerCase() };
+  sizeKey(); applyHover(); legend();
+}
+let SIZE = null, parts = [], PCOV = null;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv = document.getElementById('flowcv'), ctx = cv.getContext('2d');
+function setParticles(fl, cov) {
+  PCOV = S.laneView ? cov : null; parts = [];
+  const vmax = fl.length ? fl[0].v : 1;
+  for (const f of fl) { const k = Math.sqrt(f.v / vmax), n = 1 + Math.round(4 * k); for (let q = 0; q < n; q++) parts.push({ f, ph: Math.random(), sp: .00007 + .00013 * k, k }); }
+  parts = parts.slice(0, 900);
+}
+function tick(t) {
+  const el = svg.node(), w = el.clientWidth, h = el.clientHeight, dpr = window.devicePixelRatio || 1;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  if (S.moving && !reduceMotion && parts.length) {
+    const s = Math.min(w / VW, h / VH), ox = (w - VW * s) / 2, oy = (h - VH * s) / 2, p = pos();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const q of parts) {
+      const a = p[q.f.i], b = p[q.f.j], u = (t * q.sp + q.ph) % 1;
+      const x = ox + s * (zt.k * (a[0] + (b[0] - a[0]) * u) + zt.x), y = oy + s * (zt.k * (a[1] + (b[1] - a[1]) * u) + zt.y);
+      let alpha = Math.sin(Math.PI * u) * (.35 + .6 * q.k), col = GC[nodes[q.f.i].g];
+      if (PCOV) { if (PCOV[q.f.i] && PCOV[q.f.j]) col = '#37E2D5'; else alpha *= .12; }
+      if (S.hover != null && q.f.i !== S.hover && q.f.j !== S.hover) alpha *= .08;
+      ctx.globalAlpha = alpha * .25; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, 5.5 * Math.min(1.6, zt.k * s + .2), 0, 7); ctx.fill();
+      ctx.globalAlpha = alpha; ctx.beginPath(); ctx.arc(x, y, 1.9 * Math.min(1.6, zt.k * s + .2), 0, 7); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+function applyHover() {
+  const hv = S.hover;
+  const near = hv == null ? null : new Set(nodes.map((_, j) => j).filter(j => j === hv || T[hv][j] > 0 || T[j][hv] > 0));
+  gNodes.selectAll('circle').style('opacity', i => (near ? (near.has(i) ? 1 : .12) : null));
+  gFlows.selectAll('path').style('opacity', d => (hv == null ? null : d.i === hv || d.j === hv ? 1 : .05)).style('stroke', d => (hv != null && (d.i === hv || d.j === hv) ? '#37E2D5' : null));
+}
+function sizeKey() {
+  const el = document.getElementById('sizekey'); if (!SIZE || !el) return;
+  const svgEl = svg.node(), s = Math.min(svgEl.clientWidth / VW, svgEl.clientHeight / VH) * zt.k, mx = d3.max(SIZE.size);
+  const vals = [mx, mx / 3, mx / 10].map(v => Math.max(1000, Math.round(v / 1000) * 1000)), rr = vals.map(v => SIZE.r(v) * s), H = 2 * rr[0] + 6;
+  el.innerHTML = `<div class="label">What circle size means</div><svg width="${2 * rr[0] + 70}" height="${H}">${vals.map((v, k) => `<circle cx="${rr[0] + 2}" cy="${H - rr[k] - 2}" r="${rr[k]}" fill="none" stroke="#9DB7C9" stroke-dasharray="${k ? '3 3' : ''}"/><text x="${2 * rr[0] + 10}" y="${H - 2 * rr[k] + 8}">${d3.format('.2~s')(v).replace('k', 'k')}</text>`).join('')}</svg><div>Area = ${SIZE.label}, Jan–Apr 2026. 4× the trips = 2× the width.</div>`;
 }
 function legend() {
   const el = document.getElementById('legend');
-  el.innerHTML = (S.colorBy === 'g' ? DATA.groups.map((g, k) => `<span><i style="background:${DATA.gcol[k]}"></i>${g}</span>`).join('')
-    : `<span><i style="background:#5FB98A"></i>Stable (≥ 0.80)</span><span><i style="background:#E0B341"></i>Moves sometimes</span><span><i style="background:#E8673A"></i>Moves often</span>`)
+  el.innerHTML = (S.colorBy === 'g' ? DATA.groups.map((g, k) => `<span><i style="background:${GC[k]}"></i>${g}</span>`).join('')
+    : `<span><i style="background:#A3E635"></i>Stable (≥ 0.80)</span><span><i style="background:#FFD166"></i>Moves sometimes</span><span><i style="background:#FF6B6B;color:#FF6B6B"></i>Moves often</span>`)
     + `<span>Circle size: ${document.getElementById('sizeBy').selectedOptions[0].text.toLowerCase()}</span>`
     + (S.hubs.length ? `<span>White ring = hub; faded = out of reach (${S.radius} km)</span>` : '')
     + '<span>Scroll or pinch to zoom; drag to pan</span>'
@@ -360,7 +455,7 @@ function toggleHub(i) { S.hubs = S.hubs.includes(i) ? S.hubs.filter(h => h !== i
 
 // ---------------------------------------------------------------- shared pieces
 function barsHTML(rows, max = 100, mark = null, fmt = pct) {
-  return `<div class="bars">${rows.map(r => `<div class="bar"><span>${r.label}</span><span class="track"><span class="fill" style="width:${Math.max(0, Math.min(100, 100 * r.v / max))}%;background:${r.color || '#C8955A'}"></span>${mark != null ? `<span class="mark" style="left:${100 * mark / max}%"></span>` : ''}</span><span class="num" style="text-align:right">${fmt(r.v)}</span></div>`).join('')}</div>`;
+  return `<div class="bars">${rows.map(r => `<div class="bar"><span>${r.label}</span><span class="track"><span class="fill" style="width:${Math.max(0, Math.min(100, 100 * r.v / max))}%;background:${r.color || '#37E2D5'}"></span>${mark != null ? `<span class="mark" style="left:${100 * mark / max}%"></span>` : ''}</span><span class="num" style="text-align:right">${fmt(r.v)}</span></div>`).join('')}</div>`;
 }
 function liveMetrics() {
   const h = S.hubs, tot = W.reduce((a, b) => a + b, 0);
@@ -380,13 +475,13 @@ function plannerHTML() {
     <p class="hint">Click provinces on the map to add or remove hubs (up to 5). Every number below is recalculated in your browser.</p>
     <div class="chips">${S.hubs.map(i => `<span class="chip hub">★ ${nodes[i].en}<button aria-label="Remove ${nodes[i].en}" data-rm="${i}">×</button></span>`).join('') || '<span class="muted">No hubs yet</span>'}</div>
     <div class="metrics">
-      <div class="metric"><b class="num">${pct(m.c)}</b><span>of ${unit()} start within reach</span></div>
-      <div class="metric"><b class="num">${fmt0(Math.round(m.perMonth))}</b><span>${unit()} a month within reach</span></div>
-      <div class="metric"><b class="num">${pct(m.l)}</b><span>trips with both ends near a hub (return loads)</span></div>
+      <div class="metric"><b class="num" data-k="c" data-v="${m.c}" data-f="pct">${pct(m.c)}</b><span>of ${unit()} start within reach</span></div>
+      <div class="metric"><b class="num" data-k="pm" data-v="${m.perMonth}" data-f="int">${fmt0(Math.round(m.perMonth))}</b><span>${unit()} a month within reach</span></div>
+      <div class="metric"><b class="num" data-k="l" data-v="${m.l}" data-f="pct">${pct(m.l)}</b><span>trips with both ends near a hub (return loads)</span></div>
       <div class="metric"><b class="num">${m.over}</b><span>provinces near two hubs (overlap)</span></div>
     </div>
     <div class="note">${bestTxt}</div>
-    <div><div class="label" style="margin-bottom:6px">Reach in each market group</div>${barsHTML(m.groups.map((v, g) => ({ label: DATA.groups[g], v, color: DATA.gcol[g] })), 100, 50)}<div class="note">Line = 50%, the minimum Model B requires.</div></div>
+    <div><div class="label" style="margin-bottom:6px">Reach in each market group</div>${barsHTML(m.groups.map((v, g) => ({ label: DATA.groups[g], v, color: GC[g] })), 100, 50)}<div class="note">Line = 50%, the minimum Model B requires.</div></div>
     <div><div class="label">Service radius: <span class="num">${S.radius}</span> km</div><input id="radius" type="range" min="100" max="200" step="5" value="${S.radius}" aria-label="Service radius in km"><div class="note">${driveText(S.radius)} (from the GPS data)</div></div>
     <div class="row2"><span class="label">Weigh by</span><span class="seg"><button data-measure="trips" aria-pressed="${S.measure === 'trips'}">Trips</button><button data-measure="tons" aria-pressed="${S.measure === 'tons'}">Tons</button></span></div>
     <div><div class="label" style="margin-bottom:4px">Goods we carry</div><div class="prodlist">${P.map((p, k2) => `<label><input type="checkbox" data-prod="${k2}" ${S.prod[k2] ? 'checked' : ''}> ${p}</label>`).join('')}</div></div>
@@ -406,7 +501,7 @@ function provinceHTML() {
   return `<div class="card stack">
     <div class="label">Province</div>
     <div><h2>${n.en}</h2><div class="thai muted">${n.th}</div></div>
-    <div class="row2"><span class="chip"><span class="dot" style="background:${DATA.gcol[n.g]}"></span>${DATA.groups[n.g]}&nbsp;</span>
+    <div class="row2"><span class="chip"><span class="dot" style="background:${GC[n.g]}"></span>${DATA.groups[n.g]}&nbsp;</span>
       <span class="chip ${n.conf < .8 ? 'flag' : ''}">Group stability ${n.conf.toFixed(2)}${n.conf < .8 ? ' · moves between runs' : ''}&nbsp;</span></div>
     <div class="metrics">
       <div class="metric"><b class="num">${fmt0(Math.round(o[i]))}</b><span>trips start here (rank ${rank(o)} of 77)</span></div>
@@ -415,7 +510,7 @@ function provinceHTML() {
       <div class="metric"><b class="num">${n.partners}</b><span>provinces it trades with (of 76)</span></div>
     </div>
     <div><div class="label" style="margin-bottom:6px">Where its loads go</div>${barsHTML(dests.map(d => ({ label: nodes[d.j].en, v: d.v })), mx, null, v => fmt0(Math.round(v)))}</div>
-    <div><div class="label" style="margin-bottom:6px">Where its arrivals come from</div>${barsHTML(origs.map(d => ({ label: nodes[d.j].en, v: d.v, color: '#8C8B96' })), mx, null, v => fmt0(Math.round(v)))}</div>
+    <div><div class="label" style="margin-bottom:6px">Where its arrivals come from</div>${barsHTML(origs.map(d => ({ label: nodes[d.j].en, v: d.v, color: '#7F9AAE' })), mx, null, v => fmt0(Math.round(v)))}</div>
     <div class="note">PageRank rank ${rank(nodes.map(x => x.pr))} (receives from provinces that receive a lot) · betweenness rank ${rank(nodes.map(x => x.btw))} (sits between trading partners; not a road route)</div>
     <div class="note">${S.hubs.length ? (near.length ? `Within ${S.radius} km of: ${near.map(h => nodes[h].en).join(', ')}` : `Not within ${S.radius} km of any hub`) : 'Add hubs in the planner to see if it is within reach.'}</div>
     <div class="row2"><button class="primary" data-addhub="${i}">${S.hubs.includes(i) ? 'Remove hub here' : 'Make this a hub'}</button></div>
@@ -447,7 +542,7 @@ const STEPS = [
   { t: 'We treat freight as a network', set() { setView({ layout: 'net', arrows: false, sizeBy: 'tot', nFlows: 120, sel: null, focus: [] }); },
     b: () => `<ul><li><b>Actors:</b> 77 provinces</li><li><b>Ties:</b> truck trips from one province to another</li><li><b>Structure:</b> market groups, key provinces, overlap between hubs</li><li><b>Decision:</b> a set of 2–3 hubs</li></ul>
       <p>This is a group-level decision: a hub's value depends on where the other hubs are. In this view, provinces that trade more sit closer together.</p>` },
-  { t: 'Four market groups, checked the course way', set() { setView({ layout: 'geo', colorBy: 'g', sizeBy: 'out', nFlows: 80 }); },
+  { t: 'Four market groups, checked the course way', set() { setView({ layout: 'geo', colorBy: 'g', sizeBy: 'out', nFlows: 80, hulls: true }); },
     b: () => { const c2 = DATA.check2[0];
       return `<p>Louvain community detection finds 4 groups: ${DATA.groups.join(', ')}.</p>
       <ul><li>None of ${fmt0(1000)} randomly rewired copies scored as high as our network (p = ${F.c1000_p}), so the groups are real.</li><li>Leiden finds exactly the same groups.</li>
@@ -459,7 +554,7 @@ const STEPS = [
       <p>One hub lands in each of North, Central and Northeast, without the model being told to.</p>` },
   { t: 'Better than any ranking', set() { setView({ hubs: Calc.topK(nodes.map((_, i) => outT()[i] + inT()[i]), 3), nFlows: 40 }); later(2200, () => { S.hubs = DATA.models.A_3.slice(); render(); }); },
     b: () => `<p>Same budget, same 150 km rule, different ways to pick 3 hubs. The map first shows the top 3 by total trips, then Model A.</p>
-      ${barsHTML([['Random set (average)', 'Random (mean of all sets)', '#6B6A75'], ['Top 3 by all trips', 'Top by strength (in+out)', '#8C8B96'], ['Top 3 by trips that start there', 'Top by out-strength (origin trips)', '#8C8B96'], ['Greedy, one at a time', 'Greedy', '#5FB98A'], ['Model A', 'Optimal (Model A, MILP = brute force)', '#E8673A']].map(([l, m, c]) => ({ label: l, v: seed3(m), color: c })))}
+      ${barsHTML([['Random set (average)', 'Random (mean of all sets)', '#4C6A80'], ['Top 3 by all trips', 'Top by strength (in+out)', '#7F9AAE'], ['Top 3 by trips that start there', 'Top by out-strength (origin trips)', '#7F9AAE'], ['Greedy, one at a time', 'Greedy', '#A3E635'], ['Model A', 'Optimal (Model A, MILP = brute force)', '#FFB547']].map(([l, m, c]) => ({ label: l, v: seed3(m), color: c })))}
       <p>Model A beats the best ranking by <b>${F.gain_rank}</b> points and greedy by <b>${F.gain_greedy}</b>.</p>` },
   { t: 'The service radius decides the provinces', set() { setView({ hubs: DATA.models.A_3.slice(), radius: 150 }); later(1400, () => { S.radius = 125; recompute(); render(); }); },
     b: () => { const r = DATA.radius.filter(x => x.k === 3);
@@ -481,15 +576,16 @@ const STEPS = [
       <button class="primary" id="goExplore">Explore it yourself</button>` },
 ];
 function setView(o) {
-  Object.assign(S, { focus: [], sel: null, arrows: false, laneView: false, colorBy: 'g', layout: 'geo', radius: 150, measure: 'trips', prod: P.map(() => true) }, o);
+  Object.assign(S, { hubs: [], focus: [], sel: null, arrows: false, laneView: false, hulls: false, colorBy: 'g', layout: 'geo', radius: 150, measure: 'trips', prod: P.map(() => true) }, o);
   recompute(); syncControls();
 }
 function storyPanel() {
   const st = STEPS[S.step], m = liveMetrics();
   return `<div class="card story">
     <div class="stepnav"><span class="label">Step ${S.step + 1} of ${STEPS.length}</span><span class="row2"><button data-step="-1" aria-label="Previous step">←</button><button class="primary" data-step="1" aria-label="Next step">→</button></span></div>
+    <div class="progress"><span style="width:${100 * (S.step + 1) / STEPS.length}%"></span></div>
     <h2>${st.t}</h2><div class="body">${st.b()}</div>
-    ${S.hubs.length ? `<div class="metrics"><div class="metric"><b class="num">${pct(m.c)}</b><span>trips within reach (${hubNames(S.hubs)})</span></div><div class="metric"><b class="num">${pct(m.l)}</b><span>both ends near a hub</span></div></div>` : ''}
+    ${S.hubs.length ? `<div class="metrics"><div class="metric"><b class="num" data-k="c" data-v="${m.c}" data-f="pct">${pct(m.c)}</b><span>trips within reach (${hubNames(S.hubs)})</span></div><div class="metric"><b class="num" data-k="l" data-v="${m.l}" data-f="pct">${pct(m.l)}</b><span>both ends near a hub</span></div></div>` : ''}
     <div class="dots">${STEPS.map((_, k) => `<button aria-label="Go to step ${k + 1}" data-goto="${k}" ${k === S.step ? 'aria-current="step"' : ''}></button>`).join('')}</div>
   </div>`;
 }
@@ -507,19 +603,19 @@ function hist(el, vals, obs, title) {
   const bins = d3.bin().domain(x.domain()).thresholds(24)(vals), y = d3.scaleLinear([0, d3.max(bins, b => b.length)], [h - m.b, m.t]);
   const s = d3.select(el).append('svg').attr('viewBox', `0 0 ${w} ${h}`).attr('width', '100%');
   s.append('text').attr('x', m.l).attr('y', 14).attr('class', 'lbl').text(title);
-  s.append('g').selectAll('rect').data(bins).join('rect').attr('x', b => x(b.x0) + 1).attr('width', b => Math.max(0, x(b.x1) - x(b.x0) - 2)).attr('y', b => y(b.length)).attr('height', b => y(0) - y(b.length)).attr('fill', '#8C8B96');
-  s.append('line').attr('x1', x(obs)).attr('x2', x(obs)).attr('y1', m.t).attr('y2', h - m.b).attr('stroke', '#E8673A').attr('stroke-width', 2.5);
+  s.append('g').selectAll('rect').data(bins).join('rect').attr('x', b => x(b.x0) + 1).attr('width', b => Math.max(0, x(b.x1) - x(b.x0) - 2)).attr('y', b => y(b.length)).attr('height', b => y(0) - y(b.length)).attr('fill', '#7F9AAE');
+  s.append('line').attr('x1', x(obs)).attr('x2', x(obs)).attr('y1', m.t).attr('y2', h - m.b).attr('stroke', '#FFB547').attr('stroke-width', 2.5);
   const right = x(obs) > (m.l + w - m.r) / 2;
   s.append('text').attr('x', x(obs) + (right ? -6 : 6)).attr('y', m.t + 14).attr('text-anchor', right ? 'end' : 'start').attr('class', 'lbl').text(`ours ${obs.toFixed(3)}`);
-  s.append('g').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(5)).call(g => g.selectAll('line,path').attr('stroke', '#6B6A75'));
+  s.append('g').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(5)).call(g => g.selectAll('line,path').attr('stroke', '#4C6A80'));
 }
 function lineChart(el, rows) {
   const w = 520, h = 260, m = { l: 40, r: 34, t: 16, b: 36 };
   const x = d3.scalePoint(rows.map(r => r.radius_km), [m.l, w - m.r]), y = d3.scaleLinear([30, 100], [h - m.b, m.t]);
   const s = d3.select(el).append('svg').attr('viewBox', `0 0 ${w} ${h}`).attr('width', '100%');
-  s.append('g').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickFormat(d => d + ' km')).call(g => g.selectAll('line,path').attr('stroke', '#6B6A75'));
-  s.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => d + '%')).call(g => g.selectAll('line,path').attr('stroke', '#6B6A75'));
-  [['coverage', '#C8955A', 'Best 3 hubs for that radius'], ['A3_sites_coverage', '#E8673A', 'Our 3 hubs (chosen at 150 km)']].forEach(([k, c, lab], q) => {
+  s.append('g').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickFormat(d => d + ' km')).call(g => g.selectAll('line,path').attr('stroke', '#4C6A80'));
+  s.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => d + '%')).call(g => g.selectAll('line,path').attr('stroke', '#4C6A80'));
+  [['coverage', '#37E2D5', 'Best 3 hubs for that radius'], ['A3_sites_coverage', '#FFB547', 'Our 3 hubs (chosen at 150 km)']].forEach(([k, c, lab], q) => {
     s.append('path').datum(rows).attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2.5).attr('stroke-dasharray', q ? '6 4' : null).attr('d', d3.line(r => x(r.radius_km), r => y(r[k])));
     s.selectAll(null).data(rows).join('circle').attr('cx', r => x(r.radius_km)).attr('cy', r => y(r[k])).attr('r', 4).attr('fill', c);
     s.append('text').attr('x', w - m.r).attr('y', h - m.b - 12 - 16 * q).attr('text-anchor', 'end').attr('class', 'lbl').style('fill', c).text(lab);
@@ -528,7 +624,7 @@ function lineChart(el, rows) {
 function findingsBody() {
   const k = S.ftab, el = document.getElementById('fbody');
   document.getElementById('ftabs').innerHTML = FT.map(([id, lab]) => `<button role="tab" data-ftab="${id}" aria-pressed="${k === id}">${lab}</button>`).join('');
-  const groups = DATA.groups.map((g, i) => { const mem = nodes.filter(n => n.g === i); return [`<span class="dot" style="background:${DATA.gcol[i]}"></span> ${g}`, mem.length, F[`g${i}_share`], mem.filter(n => n.conf < .8).length]; });
+  const groups = DATA.groups.map((g, i) => { const mem = nodes.filter(n => n.g === i); return [`<span class="dot" style="background:${GC[i]}"></span> ${g}`, mem.length, F[`g${i}_share`], mem.filter(n => n.conf < .8).length]; });
   if (k === 'groups') {
     el.innerHTML = `<div class="grid2"><div class="stack"><h3>The four groups</h3>${table(['Group', 'Provinces', 'Share of trips', 'Unstable'], groups, [1, 2, 3])}
       <h3>The four checks from Chapter 9</h3>${table(['Check', 'Question', 'Result'], [
@@ -557,7 +653,7 @@ function findingsBody() {
       ${what('A pickup hub should follow where trips start. Totals mix in the ports (Chonburi, Samut Prakan), where trips end. Betweenness here measures position between trading partners, not a road route, because each link is already a direct trip.', 'results/centrality_directed.csv (follows the goods filter in the planner)')}</div></div>`;
   } else if (k === 'ranking') {
     const rows = kk => DATA.seeding.filter(s => s.k === kk);
-    el.innerHTML = `<div class="grid2">${[3, 2].map(kk => `<div class="stack"><h3>${kk} hubs: every method, same rule</h3>${barsHTML(rows(kk).map(s => ({ label: s.method.replace('Top by ', 'Top ' + kk + ' by ').replace('(origin trips)', '').replace('Optimal (Model A, MILP = brute force)', 'Model A (best set)'), v: s.coverage, color: s.method.startsWith('Optimal') ? '#E8673A' : s.method === 'Greedy' ? '#5FB98A' : '#8C8B96' })))}</div>`).join('')}</div>
+    el.innerHTML = `<div class="grid2">${[3, 2].map(kk => `<div class="stack"><h3>${kk} hubs: every method, same rule</h3>${barsHTML(rows(kk).map(s => ({ label: s.method.replace('Top by ', 'Top ' + kk + ' by ').replace('(origin trips)', '').replace('Optimal (Model A, MILP = brute force)', 'Model A (best set)'), v: s.coverage, color: s.method.startsWith('Optimal') ? '#FFB547' : s.method === 'Greedy' ? '#A3E635' : '#7F9AAE' })))}</div>`).join('')}</div>
       ${table(['Method (3 hubs)', 'Hubs', 'Reached together', 'Sum when counted one by one'], rows(3).filter(s => s.hubs).map(s => [s.method, s.hubs, pct(s.coverage), s.sum_of_singles ? pct(s.sum_of_singles) : '–']), [2, 3])}
       ${what(`Picking hubs is a seed-selection problem (Chapter 10): each hub "reaches" provinces within the radius. Rankings fail because high-ranked provinces sit near each other: counted one by one they add up to far more than they reach together. Greedy adds the best next hub each time and gets close; the optimiser compares whole sets and does ${F.gain_greedy} points better.`, 'results/seeding.csv')}`;
   } else if (k === 'sure') {
@@ -594,7 +690,7 @@ function findingsBody() {
       ${what('These five questions walk several steps through the graph (hub → pickup province → destination → hub), which is what a graph database is for. The same answers come from Freight_GraphDB_Neo4j.ipynb; totals match the notebook exactly.', 'Freight_GraphDB_Neo4j.ipynb')}</div></div>`;
   } else if (k === 'ab') {
     const a = Calc.groupCoverage(DATA.models.A_3, W, A, nodes.map(n => n.g)), b = Calc.groupCoverage(DATA.models['B_3_0.5'], W, A, nodes.map(n => n.g));
-    el.innerHTML = `<div class="grid2"><div class="stack"><h3>Reach in each market group</h3>${DATA.groups.map((g, i) => `<div><div class="note">${g}</div>${barsHTML([{ label: 'Model A', v: a[i], color: '#C8955A' }, { label: 'Model B', v: b[i], color: '#E8673A' }], 100, 50)}</div>`).join('')}</div>
+    el.innerHTML = `<div class="grid2"><div class="stack"><h3>Reach in each market group</h3>${DATA.groups.map((g, i) => `<div><div class="note">${g}</div>${barsHTML([{ label: 'Model A', v: a[i], color: '#37E2D5' }, { label: 'Model B', v: b[i], color: '#FFB547' }], 100, 50)}</div>`).join('')}</div>
       <div class="stack">${table(['3 hubs', 'Model A', 'Model B'], [['Hubs', hubNames(DATA.models.A_3), hubNames(DATA.models['B_3_0.5'])], ['All trips reached', F.A3, F.B3], ['Weakest group', F.weak_A, F.weak_B], ['Works with 2 hubs', 'Yes', 'No'], ['Return loads', F.lane_A3, pct(DATA.lane.find(l => l.set === 'B_3_0.5').lane_coverage)], ['Decision', 'Main case', 'Option']])}
       ${what(`Model B adds one rule: every market group gets at least 50% of its trips within reach. West & South rises from ${F.ws_A} to ${F.ws_B}; total reach falls ${F.B_cost} points. We pick A because no contract or policy requires every region yet. These bars follow the radius and goods set in the planner.`, 'results/community_coverage.csv, models.csv')}</div></div>`;
   } else if (k === 'method') {
@@ -615,23 +711,44 @@ function findingsBody() {
 function syncControls() {
   document.getElementById('layGeo').setAttribute('aria-pressed', S.layout === 'geo'); document.getElementById('layNet').setAttribute('aria-pressed', S.layout === 'net');
   document.getElementById('sizeBy').value = S.sizeBy; document.getElementById('colorBy').value = S.colorBy;
-  document.getElementById('nFlows').value = S.nFlows; document.getElementById('nFlowsV').textContent = S.nFlows; document.getElementById('arrows').checked = S.arrows;
+  document.getElementById('nFlows').value = S.nFlows; document.getElementById('nFlowsV').textContent = S.nFlows; document.getElementById('arrows').checked = S.arrows; document.getElementById('hulls').checked = S.hulls;
   document.getElementById('modeStory').setAttribute('aria-pressed', S.mode === 'story'); document.getElementById('modeExplore').setAttribute('aria-pressed', S.mode === 'explore');
+}
+const PREV = {};
+function tweenTo(el, key, to, f) {
+  const from = PREV[key] ?? 0; PREV[key] = to; const fm = f === 'pct' ? pct : v => fmt0(Math.round(v));
+  if (reduceMotion || Math.abs(from - to) < 1e-9) { el.textContent = fm(to); return; }
+  d3.select(el).transition().duration(650).ease(d3.easeCubicOut).tween('text', () => { const it = d3.interpolateNumber(from, to); return u => (el.textContent = fm(it(u))); });
+}
+function tweenNums(scope) { scope.querySelectorAll('[data-v]').forEach(el => tweenTo(el, 'p' + el.dataset.k, +el.dataset.v, el.dataset.f)); }
+function updateKPIs() {
+  const m = liveMetrics(), has = S.hubs.length > 0;
+  [['kReach', m.c, 'pct'], ['kMonth', m.perMonth, 'int'], ['kLane', m.l, 'pct']].forEach(([id, v, f]) => { const el = document.getElementById(id); if (has) tweenTo(el, id, v, f); else { PREV[id] = 0; el.textContent = '–'; } });
 }
 function render() {
   syncControls(); drawMap(); frame();
   const panel = document.getElementById('panel');
   panel.innerHTML = S.mode === 'story' ? storyPanel() : explorePanel();
+  tweenNums(panel); updateKPIs();
   findingsBody();
 }
 document.getElementById('modeStory').onclick = () => { S.mode = 'story'; goStep(S.step); };
-document.getElementById('modeExplore').onclick = () => { cancel(); S.mode = 'explore'; S.tab = 'planner'; render(); };
+document.getElementById('modeExplore').onclick = () => { setAuto(false); cancel(); S.mode = 'explore'; S.tab = 'planner'; render(); };
 document.getElementById('layGeo').onclick = () => { S.layout = 'geo'; render(); };
 document.getElementById('layNet').onclick = () => { S.layout = 'net'; render(); };
 document.getElementById('sizeBy').onchange = e => { S.sizeBy = e.target.value; render(); };
 document.getElementById('colorBy').onchange = e => { S.colorBy = e.target.value; render(); };
 document.getElementById('nFlows').oninput = e => { S.nFlows = +e.target.value; syncControls(); drawMap(); };
 document.getElementById('arrows').onchange = e => { S.arrows = e.target.checked; render(); };
+document.getElementById('moving').onchange = e => { S.moving = e.target.checked; };
+document.getElementById('hulls').onchange = e => { S.hulls = e.target.checked; drawMap(); };
+let autoTimer = null;
+function setAuto(on) {
+  S.auto = on; clearInterval(autoTimer); document.getElementById('autoplay').setAttribute('aria-pressed', on); document.getElementById('autoplay').textContent = on ? '❚❚ Pause' : '▶ Autoplay';
+  if (on) { if (S.mode !== 'story') { S.mode = 'story'; goStep(S.step); } autoTimer = setInterval(() => (S.step < STEPS.length - 1 ? goStep(S.step + 1) : setAuto(false)), 12000); }
+}
+document.getElementById('autoplay').onclick = () => setAuto(!S.auto);
+document.getElementById('fs').onclick = () => { const d = document; (d.fullscreenElement ? d.exitFullscreen?.() : d.documentElement.requestFullscreen?.())?.catch?.(() => {}); };
 document.getElementById('panel').addEventListener('click', e => {
   const t = e.target.closest('button'); if (!t) return;
   if (t.dataset.step) goStep(S.step + +t.dataset.step);
@@ -658,7 +775,7 @@ document.getElementById('panel').addEventListener('change', e => {
 document.getElementById('ftabs').addEventListener('click', e => { const t = e.target.closest('button'); if (t) { S.ftab = t.dataset.ftab; findingsBody(); } });
 document.addEventListener('keydown', e => {
   if (S.mode !== 'story' || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
-  if (e.key === 'ArrowRight') goStep(S.step + 1); if (e.key === 'ArrowLeft') goStep(S.step - 1);
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goStep(S.step + 1); } if (e.key === 'ArrowLeft') goStep(S.step - 1);
 });
 recompute(); goStep(0);
 })();
