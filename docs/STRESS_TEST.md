@@ -14,6 +14,7 @@ Run with `pytest -q tests/` (about 7 minutes; needs the two OTP CSVs in `data/`)
 | 4 | Full 2025 data, radius 100–200 km | At 150 km our three hubs are also the best set in 2025 (83.0%). At 100 and 125 km the best sets differ and our hubs lose 18 points | Pass at 150 km; radius risk reported in the deck |
 | 5 | Whole notebook on newer libraries (Python 3.13, pandas 3.1.1, numpy 2.5.5) | All 24 result tables identical | Pass |
 | 6 | Deck checks (`deck/lint_deck.py`) | No banned phrasing; every number on the slides and in the notes traces to `deck/facts.json`; text fits every box by Arial metrics; speaking time 14:00 | Pass |
+| 8 | Fresh clone of the public repo, data re-downloaded from the official source, notebook run from scratch | Data hashes match; all 29 result tables identical to the published ones | Pass |
 | 7 | Secret scan before publishing (working tree and full git history) | No password, URI host or instance ID found | Pass |
 
 ## What this does not cover
