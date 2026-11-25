@@ -37,7 +37,7 @@ python -m pip install pandas numpy scipy networkx matplotlib ipykernel
 
 กรณีหลัก 150 กม. เส้นตรง: A สองฐานเลือกพิษณุโลก–สระบุรี coverage 66.4%; A สามฐานเพิ่มมหาสารคาม coverage 82.3%; B สามฐาน floor 50% ได้ 80.1%
 
-Null test p=0.9604 จึงยังไม่สนับสนุน modularity สูงกว่าการสุ่มน้ำหนักแบบที่ทดสอบ Model B เป็น exploratory ไม่ใช่กฎลงทุน ผลตรวจย้อนหลังไม่ใช่ unseen holdout และ benchmark ของ B เป็น Model A ที่ไม่มีข้อกำหนดรายกลุ่ม
+กลุ่มตลาดผ่าน Check 2 ของบทที่ 9 (rewired copies 0/100, p≈0.01; Leiden ให้ split เดียวกัน) แต่ไม่ผ่าน weight permutation (p=0.9604) และ 12 จังหวัดในกลุ่ม Central ความมั่นใจ < 0.80 Model A ชนะ ranking ที่เหมาะสม (out-strength 72.1%) 10.2 จุด และ greedy 4.9 จุด ฐานเปลี่ยนตามรัศมีแต่สามฐานอยู่ North/Central/Northeast เสมอ (ดูส่วน 11 และ `docs/DECK_REVISIONS.md`) Model B เป็น exploratory ไม่ใช่กฎลงทุน ผลตรวจย้อนหลังไม่ใช่ unseen holdout และ benchmark ของ B เป็น Model A ที่ไม่มีข้อกำหนดรายกลุ่ม
 
 Coverage ไม่ใช่ยอดขายหรือกำไร ไม่มีต้นทุน capacity ระยะถนนจริง หรือข้อมูลคู่แข่ง และยังไม่ได้หาจำนวนฐานน้อยที่สุดภายใต้ coverage target
 
