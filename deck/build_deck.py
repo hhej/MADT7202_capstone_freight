@@ -186,6 +186,7 @@ def text(s, x, y, w_, h, paras, size=20, color=WHITE, bold=False, align=PP_ALIGN
         runs = p if isinstance(p, list) else [p]
         for r in runs:
             t, o = (r, {}) if isinstance(r, str) else r
+            assert '\n' not in t, 'use separate paragraphs, not newlines inside a run'
             run = para.add_run(); run.text = t; fnt = run.font; fnt.name = 'Arial'
             fnt.size = Pt(o.get('size', size)); fnt.bold = o.get('bold', bold); fnt.color.rgb = rgb(o.get('color', color))
         para.alignment = align; para.line_spacing = spacing; para.space_after = Pt(after)
@@ -199,6 +200,7 @@ def header(s, light=True):
     shape(s, .83, .48, .3, .3, TANC); text(s, 1.25, .38, 8, .4, 'HUB LOCATION STUDY · MADT 7202', 12.5, 'C9C9D1', True)
 
 PAGE = [0]
+NOTES = {}  # speaker script; kept out of the pptx because python-pptx notes pages break Keynote and Quick Look
 def chrome(label, title, sub=None, source=None, notes=''):
     s = prs.slides.add_slide(BLANK); PAGE[0] += 1
     shape(s, 0, 0, 20, 11.25, BG); header(s); dots(s)
@@ -207,7 +209,7 @@ def chrome(label, title, sub=None, source=None, notes=''):
     if sub: text(s, .83, 2.3, 17.5, .6, sub, 20, 'A9A9B3')
     if source: text(s, .83, 10.62, 16.5, .45, 'Source: ' + source, 11, '8E8E99')
     text(s, 18.6, 10.62, .6, .4, f'{PAGE[0]:02d}', 13, TANC, True, PP_ALIGN.RIGHT)
-    s.notes_slide.notes_text_frame.text = notes
+    NOTES[PAGE[0]] = notes
     return s
 
 def headline(s, t, y=3.15):
@@ -244,9 +246,9 @@ def divider(part, title, sub, photo, notes=''):
     s.shapes.add_picture(str(ASSETS / photo), 0, 0, Inches(20), Inches(11.25)); shape(s, 0, 0, 20, 11.25, '1E1D26', alpha=.55)
     header(s); dots(s, 18.3, 10.15, 'FFFFFF')
     text(s, 1.35, 3.25, 10, .6, f'PART {part}', 26, TANC, True)
-    text(s, 1.35, 3.9, 14, 3.2, title, 96, WHITE, True, spacing=.9)
+    text(s, 1.35, 3.9, 14, 3.2, title.split('\n'), 96, WHITE, True, spacing=.9, after=0)  # one paragraph per line: no raw newline inside a run
     shape(s, 1.35, 7.73, 6.9, .62, TANC); text(s, 1.55, 7.73, 6.6, .62, sub, 20, DARK, True, anchor=MSO_ANCHOR.MIDDLE)
-    s.notes_slide.notes_text_frame.text = notes
+    NOTES[PAGE[0]] = notes
 
 SRC = f'OTP truck freight data (otp_69_01), Jan–Apr 2026, 7 farm and food goods; code and results at {REPO}'
 
@@ -257,7 +259,7 @@ s.shapes.add_picture(str(ASSETS / 'photo_title.jpg'), 0, 0, Inches(20), Inches(1
 header(s); text(s, 1.2, 2.3, 11, 4.2, 'WHERE SHOULD WE OPEN OUR FIRST TRUCKING HUBS?', 64, WHITE, True, spacing=.95)
 text(s, 1.3, 7.0, 11, 1.2, 'Using the freight network to pick hub locations that work as a set', 24, 'E6E6EA')
 shape(s, 0, 10.2, 20, 1.05, TANC); text(s, 12, 10.2, 7.3, 1.05, 'MADT 7202 Capstone', 22, DARK, True, PP_ALIGN.RIGHT, MSO_ANCHOR.MIDDLE)
-s.notes_slide.notes_text_frame.text = (
+NOTES[PAGE[0]] = (
  '[จันทนา · 0:15] สวัสดีค่ะ วันนี้กลุ่มเราจะตอบคำถามเดียว: ถ้าเราเป็นบริษัทรถบรรทุกเปิดใหม่ และมีงบเปิดฐานได้แค่ 2–3 แห่ง ควรเปิดที่จังหวัดไหน '
  'คำตอบของเราไม่ได้มาจากการดูว่าจังหวัดไหนมีรถวิ่งมากที่สุด แต่มาจากการมองการขนส่งทั้งประเทศเป็นเครือข่าย')
 
@@ -272,7 +274,7 @@ card(s, 8.2, 3.3, 5.25, 2.9, F['trips'], 'truck trips between provinces for our 
 card(s, 13.8, 3.3, 5.4, 2.9, 'No hub yet', 'We are a new carrier. Where we open decides who we can serve.', tan=True, bigsize=40)
 picture(s, charts['products'], 8.2, 6.5, 11.0, 4.05)
 text(s, 8.2, 10.62, 9.5, .45, 'Source: ' + SRC, 10, '8E8E99'); text(s, 18.6, 10.62, .6, .4, f'{PAGE[0]:02d}', 13, TANC, True, PP_ALIGN.RIGHT)
-s.notes_slide.notes_text_frame.text = (f'[จันทนา · 0:35] ข้อมูลที่เราใช้คือข้อมูลเปิดของ สนข. ที่มาจาก GPS รถบรรทุก ช่วงมกราคมถึงเมษายน 2569 '
+NOTES[PAGE[0]] = (f'[จันทนา · 0:35] ข้อมูลที่เราใช้คือข้อมูลเปิดของ สนข. ที่มาจาก GPS รถบรรทุก ช่วงมกราคมถึงเมษายน 2569 '
  f'เฉพาะสินค้าเกษตรและอาหาร 7 ชนิด มีเที่ยวรถข้ามจังหวัด {F["trips"]} เที่ยวในสี่เดือน มันสำปะหลังมากที่สุด รองลงมาคือข้าวและอาหารสัตว์ '
  'โจทย์ของเราคือ บริษัทยังไม่มีฐานเลย ที่ตั้งฐานจะกำหนดว่าเรารับงานจากใครได้บ้าง')
 
@@ -507,7 +509,7 @@ s = prs.slides.add_slide(BLANK); PAGE[0] += 1
 s.shapes.add_picture(str(ASSETS / 'photo_thanks.jpg'), 0, 0, Inches(20), Inches(11.25)); shape(s, 0, 0, 20, 11.25, '1E1D26', alpha=.6); header(s)
 text(s, 1.35, 3.6, 17, 2, 'THANK YOU', 110, WHITE, True); text(s, 1.4, 5.9, 17, .8, 'Questions welcome', 30, TANC, True)
 text(s, 1.4, 6.8, 17, .6, REPO, 20, 'E6E6EA')
-s.notes_slide.notes_text_frame.text = '[ณัฏฐา · 0:10] ขอบคุณค่ะ โค้ดและผลทั้งหมดอยู่ใน GitHub ตามลิงก์ ยินดีรับคำถามค่ะ (คำถามเทคนิคส่งให้ปัญจพล)'
+NOTES[PAGE[0]] = '[ณัฏฐา · 0:10] ขอบคุณค่ะ โค้ดและผลทั้งหมดอยู่ใน GitHub ตามลิงก์ ยินดีรับคำถามค่ะ (คำถามเทคนิคส่งให้ปัญจพล)'
 
 # ------------------------------------------------------------------ appendix
 s = chrome('Appendix A1', 'Data and Assumptions', 'How to read the reach numbers', SRC,
@@ -547,4 +549,9 @@ s = chrome('Team', 'Team Members', 'MADT 7202 Capstone', None, 'ภาคผน�
 table(s, 3.0, 3.3, 14, [['Student ID', 'Name', 'Presents'], ['6810424025', 'จันทนา ภัทราพรพิสิฐ', 'The challenge'], ['6810414002', 'นิษฐกานต์ รตะพิศาลพงศ์', 'Network and data'],
  ['6810424005', 'พรพรหม รุจิวัชรโอฬาร', 'Models and results'], ['6810424009', 'ปัญจพล อัมพรรัตน์', 'Technical checks and demo'], ['6810424011', 'ณัฏฐา ฉายศิริพันธ์', 'Decision and Q&A']], [3.2, 6.3, 4.5], 20, .9)
 
+(ROOT / 'deck' / 'script.json').write_text(json.dumps(NOTES, ensure_ascii=False, indent=1))
+md = ['# สคริปต์นำเสนอ (ภาษาไทย)', '', 'เวลาในวงเล็บเหลี่ยมคือเวลาพูดของสไลด์นั้น รวม 14:00 นาที ไม่รวมเดโม', '']
+for k in sorted(NOTES):
+    if NOTES[k] and NOTES[k] not in ('ภาคผนวก', 'ภาคผนวก ใช้ตอบคำถาม ไม่ต้องนำเสนอ'): md += [f'## สไลด์ {k}', '', NOTES[k], '']
+(ROOT / 'deck' / 'SCRIPT_TH.md').write_text('\n'.join(md), encoding='utf-8')
 out = ROOT / 'deck' / 'Hub_Location_Study_MADT7202.pptx'; prs.save(out); print('saved', out, PAGE[0], 'slides')

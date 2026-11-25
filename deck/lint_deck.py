@@ -11,6 +11,7 @@ from pptx.util import Emu
 ROOT = Path(__file__).resolve().parents[1]
 prs = Presentation(ROOT / 'deck' / 'Hub_Location_Study_MADT7202.pptx')
 facts = json.loads((ROOT / 'deck' / 'facts.json').read_text())
+script = json.loads((ROOT / 'deck' / 'script.json').read_text())
 
 BANNED = ['leverage', 'unlock', 'seamless', 'robust', 'delve', 'game-changer', 'game changer', 'cutting-edge', 'holistic', 'synergy',
           'empower', 'journey', 'landscape', 'not just', 'in today', 'harness', 'paradigm', 'revolutioniz', 'transformative', 'unleash',
@@ -76,7 +77,7 @@ for i, s in enumerate(prs.slides, 1):
                 if need_row > pt(row.height) + 2: problems.append(f'slide {i}: table row {r_i} needs {need_row:.0f}pt, has {pt(row.height):.0f}pt: "{row.cells[0].text[:30]}"')
                 total += need_row
             if pt(sh.top) + total > 10.55 * 72: problems.append(f'slide {i}: table runs into the footer ({(pt(sh.top) + total) / 72:.2f} in)')
-    notes = s.notes_slide.notes_text_frame.text if s.has_notes_slide else ''
+    notes = script.get(str(i), '')
     blob = '\n'.join(texts)
     for b in BANNED:
         if b in blob.lower(): problems.append(f'slide {i}: banned phrase "{b}"')
@@ -89,7 +90,7 @@ for i, s in enumerate(prs.slides, 1):
 
 total = 0
 for i, s in enumerate(prs.slides, 1):
-    nt = s.notes_slide.notes_text_frame.text if s.has_notes_slide else ''
+    nt = script.get(str(i), '')
     m = re.match(r'\[[^·]+· (\d+):(\d\d)', nt)
     if not m: continue
     sec = int(m[1]) * 60 + int(m[2]); total += sec
@@ -97,6 +98,7 @@ for i, s in enumerate(prs.slides, 1):
     rate = len(re.sub(r'\s', '', words)) / sec  # Thai speech ~ 11-13 characters per second
     if rate > 14: print(f'note: slide {i} script is brisk for {m[1]}:{m[2]} ({rate:.0f} chars/s); rehearse the pace')
 print(f'Speaking time (without demo): {total // 60}:{total % 60:02d}')
+assert not any(sl.has_notes_slide for sl in prs.slides), 'notes pages break Keynote/Quick Look: keep the script in SCRIPT_TH.md'
 print(f'{len(prs.slides)} slides checked; tightest text fits (need / have, pt):')
 for r in sorted(TIGHT, reverse=True)[:6]: print(f'  {r[0]:.2f}  slide {r[1]}: {r[2]}')
 print('\n'.join(problems) if problems else 'OK: no banned phrasing, every number traced, all text fits')

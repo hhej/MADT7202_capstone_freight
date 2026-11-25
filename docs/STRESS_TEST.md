@@ -18,6 +18,6 @@ Run with `pytest -q tests/` (about 7 minutes; needs the two OTP CSVs in `data/`)
 | 7 | Secret scan before publishing (working tree and full git history) | No password, URI host or instance ID found | Pass |
 
 ## What this does not cover
-- The deck was checked by measurement, not by a full visual render: neither Keynote nor Quick Look could render it in this environment. Look at every slide once after importing into Canva.
+- Every slide was rendered with macOS Quick Look (one file per slide) and checked by eye. Speaker notes are kept out of the .pptx because python-pptx notes pages stop Keynote and Quick Look from opening the file; the script is in `deck/SCRIPT_TH.md`. Check every slide once more after importing into Canva.
 - Monthly checks within 2026 use data the model has seen; 2025 is the only separate year.
 - Nothing here tests costs, truck capacity or competitors, because there is no data for them.
