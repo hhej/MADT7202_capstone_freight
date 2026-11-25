@@ -1,0 +1,5 @@
+algorithm,groups,Q,ARI_to_reported
+Louvain (reported),4,0.3314098364594893,1.0
+Leiden (modularity),4,0.3314098364594893,1.0
+Label propagation,2,0.2838677715073885,0.4576676503510736
+Greedy modularity,4,0.3282317162224751,0.9005338215952755

@@ -1,0 +1,9 @@
+﻿weight,k,hubs,coverage,same_hubs_as_A
+trips (base),2,พิษณุโลก / สระบุรี,66.42465379836975,True
+trips (base),3,พิษณุโลก / มหาสารคาม / สระบุรี,82.2864963687969,True
+tons (shipping),2,พิษณุโลก / สระบุรี,64.96018203320017,True
+tons (shipping),3,พิษณุโลก / มหาสารคาม / สระบุรี,81.83276712530284,True
+trips incl. intra-province,2,พิษณุโลก / สระบุรี,66.77661580996217,True
+trips incl. intra-province,3,พิษณุโลก / มหาสารคาม / สระบุรี,81.80076908659296,True
+origin + destination trips,2,พิษณุโลก / สระบุรี,72.52330737452401,True
+origin + destination trips,3,พิษณุโลก / มหาสารคาม / สระบุรี,85.6213448077331,True

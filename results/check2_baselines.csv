@@ -1,0 +1,4 @@
+﻿baseline,observed_Q,copies_at_or_above,null_mean,null_max,p,verdict
+"degree-preserving double_edge_swap, unweighted (Ch 9 lab method)",0.16045576971635386,0,0.06998181912764545,0.07901767761785856,0.009900990099009901,real groups (<=4 of 100)
+strength-preserving rewiring of trip ends (weighted analogue),0.3314098364594893,0,3.765780488972109e-05,9.219390066149169e-05,0.009900990099009901,real groups (<=4 of 100)
+weight permutation on fixed topology (section 5),0.3314098364594893,96,0.35377635233187205,0.37981474917719177,0.9603960396039604,luck cannot be ruled out

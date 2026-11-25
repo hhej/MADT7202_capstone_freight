@@ -1,0 +1,24 @@
+{
+  "interprovince_trips": 990030.0,
+  "A3_trips_reached_per_month": 203665.25,
+  "suphanburi_reach": 457741.0,
+  "lopburi_reach": 435842.0,
+  "suphan_lopburi_union": 457741.0,
+  "lopburi_inside_suphanburi": true,
+  "strength_top3_sum_of_singles": 86.95362766784845,
+  "provinces_within_150km_of_two_A3_hubs": 0,
+  "A3_hub_distances_km": {
+    "พิษณุโลก-มหาสารคาม": 332,
+    "พิษณุโลก-สระบุรี": 264,
+    "มหาสารคาม-สระบุรี": 315
+  },
+  "B_cost_pp": 2.1751866105067563,
+  "weakest_group_A3": 47.546172566702005,
+  "weakest_group_B3": 57.01645553088677,
+  "west_south_A3": 47.546172566702005,
+  "west_south_B3": 92.24509906385774,
+  "check2_topology_p": 0.009900990099009901,
+  "check2_strength_p": 0.009900990099009901,
+  "check2_weight_perm_p": 0.9603960396039604,
+  "flagged_provinces": 12
+}
