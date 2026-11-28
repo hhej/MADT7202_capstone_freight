@@ -67,7 +67,23 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .toolbar label { display: inline-flex; gap: 6px; align-items: center; }
 .stage { position: relative; border-radius: 16px; overflow: hidden; background: radial-gradient(70% 60% at 50% 40%, rgba(55,226,213,.08), transparent 70%), rgba(2,14,26,.45); border: 1px solid rgba(255,255,255,.08); }
 #flowcv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-#map { position: relative; z-index: 1; width: 100%; height: min(76vh, 820px); min-height: 420px; display: block; touch-action: none; }
+#map { position: relative; z-index: 1; width: 100%; height: min(calc(100vh - 300px), 820px); min-height: 420px; display: block; touch-action: none; }
+@media (min-width: 1001px) { aside.panel { position: sticky; top: 130px; max-height: calc(100vh - 150px); overflow-y: auto; overscroll-behavior: contain; } }
+.mapopts > summary { display: none; }
+.kpi b.none { color: var(--muted); font: 500 12px/1.5 var(--body); }
+.lang-th svg .lbl, .lang-th .chip, .lang-th #tip b:first-child { font-family: var(--thai); }
+details.settings > summary { cursor: pointer; }
+.cmp td:first-child { color: var(--muted); }
+@media (max-width: 600px) {
+  header.top { position: static; }  /* sticky header would eat a third of a phone screen */
+  header.top h1 { font-size: 20px; }
+  .kpi { min-width: 0; padding: 4px 8px; } .kpi b { font-size: 15px; } .kpi span { font-size: 10px; }
+  .mapopts > summary { display: list-item; font-size: 13px; color: var(--muted); padding: 2px 0 6px; }
+  #map { height: 60vh; min-height: 320px; }
+  #sizekey { display: none; }
+  .story .stepnav { position: fixed; right: 12px; bottom: max(12px, env(safe-area-inset-bottom, 0px)); z-index: 8; padding: 6px 6px 6px 14px; border-radius: 16px; background: rgba(7,27,46,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); }
+  body { padding-bottom: 80px; }
+}
 .sizekey { position: absolute; left: 12px; bottom: 12px; z-index: 2; padding: 10px 12px; border-radius: 14px; font-size: 11.5px; color: var(--muted); max-width: 230px; display: grid; gap: 6px; }
 .sizekey svg text { fill: var(--fg); font: 600 10.5px var(--body); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); }
@@ -154,6 +170,7 @@ footer a { color: var(--cyan); }
     <div class="row2">
       <button id="autoplay" aria-pressed="false" title="Advance the story every 12 seconds">▶ Autoplay</button>
       <button id="fs" title="Full screen">⛶</button>
+      <button id="lang" aria-pressed="false" title="Show province names in Thai">ไทย</button>
       <div class="seg" role="group" aria-label="Mode">
         <button id="modeStory" aria-pressed="true">Story</button>
         <button id="modeExplore" aria-pressed="false">Explore</button>
@@ -164,7 +181,9 @@ footer a { color: var(--cyan); }
 
 <div class="layout">
   <div class="card mapcard">
+    <details class="mapopts" id="mapopts" open><summary>Map options</summary>
     <div class="toolbar">
+      <button id="resetView" title="Zoom back to the starting view">⟲ Reset view</button>
       <span class="seg" role="group" aria-label="Layout"><button id="layGeo" aria-pressed="true">Map</button><button id="layNet" aria-pressed="false">Network</button></span>
       <label>Size <select id="sizeBy"><option value="out">Trips that start there</option><option value="in">Trips that end there</option><option value="tot">All trips (in + out)</option></select></label>
       <label>Colour <select id="colorBy"><option value="g">Market group</option><option value="conf">Group stability</option></select></label>
@@ -173,6 +192,7 @@ footer a { color: var(--cyan); }
       <label><input id="moving" type="checkbox" checked> Moving freight</label>
       <label><input id="hulls" type="checkbox"> Region glow</label>
     </div>
+    </details>
     <div class="stage">
       <canvas id="flowcv" aria-hidden="true"></canvas>
       <svg id="map" role="img" aria-label="Map of Thai provinces with freight flows"></svg>
@@ -212,7 +232,8 @@ const fmt0 = d3.format(','), pct = v => v.toFixed(1) + '%', pct0 = v => Math.rou
 const byEn = en => nodes.findIndex(n => n.en === en);
 const road = DATA.road, minPerKm = road.minutes_median_pairs_130_170km / 150;
 const S = { mode: 'story', layout: 'geo', sizeBy: 'out', colorBy: 'g', nFlows: 60, arrows: false, prod: P.map(() => true), measure: 'trips',
-            radius: 150, hubs: [], sel: null, tab: 'planner', ftab: 'groups', step: 0, laneView: false, focus: [], moving: true, hulls: false, hover: null, auto: false };
+            radius: 150, hubs: [], sel: null, tab: 'planner', ftab: 'groups', step: 0, laneView: false, focus: [], moving: true, hulls: false, hover: null, auto: false, lang: 'en', pin: null, settingsOpen: false };
+const nm = i => (S.lang === 'th' ? nodes[i].th : nodes[i].en);
 let W, T, A, timers = [];
 const cancel = () => { timers.forEach(clearTimeout); timers = []; };
 const later = (ms, f) => timers.push(setTimeout(f, ms));
@@ -231,7 +252,11 @@ svg.append('defs').append('filter').attr('id', 'soft').attr('x', '-30%').attr('y
 svg.select('defs').append('marker').attr('id', 'arw').attr('viewBox', '0 -4 8 8').attr('refX', 7).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
   .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#37E2D5');
 let zt = d3.zoomIdentity;
-const zoomer = d3.zoom().scaleExtent([.7, 6]).on('zoom', e => { zt = e.transform; root.attr('transform', zt); sizeKey(); });
+// plain wheel scrolls the page; Ctrl/⌘ + wheel (and trackpad pinch, which arrives as ctrl+wheel) zooms
+const zoomer = d3.zoom().scaleExtent([.7, 6]).filter(e => (e.type === 'wheel' ? e.ctrlKey || e.metaKey : !e.button))
+  .on('zoom', e => { zt = e.transform; root.attr('transform', zt); labelScale(); sizeKey(); });
+const labelScale = () => gLabels.selectAll('text').style('font-size', d => (LBL_MINOR(d) ? 13 : 15) / Math.max(1, zt.k) + 'px').style('stroke-width', 4 / Math.max(1, zt.k) + 'px');
+let LBL_MINOR = () => false;
 svg.call(zoomer);
 const THAI = DATA.outline.features.find(f => f.properties.name === 'Thailand');
 const proj = d3.geoMercator().fitExtent([[24, 18], [VW - 24, VH - 18]], THAI);
@@ -247,7 +272,15 @@ gLand.append('path').datum(THAI).attr('d', geoPath).attr('fill', 'url(#land)').a
 const place = [['MYANMAR', 97.6, 18.9], ['LAOS', 103.4, 19.3], ['CAMBODIA', 104.6, 12.9], ['MALAYSIA', 101.9, 5.9], ['VIETNAM', 106.2, 15.9], ['Andaman Sea', 97.4, 9.6], ['Gulf of Thailand', 101.2, 10.6]];
 gLand.selectAll('text.place').data(place).join('text').attr('class', 'place').attr('x', d => proj([d[1], d[2]])[0]).attr('y', d => proj([d[1], d[2]])[1])
   .attr('text-anchor', 'middle').attr('fill', 'rgba(157,183,201,.42)').style('font', d => (d[0] === d[0].toUpperCase() ? '600 11px var(--body)' : 'italic 11px var(--body)')).style('letter-spacing', d => (d[0] === d[0].toUpperCase() ? '.22em' : '0')).text(d => d[0]);
-const geoPos = nodes.map(n => proj([n.lng, n.lat]));
+const trueGeo = nodes.map(n => proj([n.lng, n.lat]));
+// nudge circles apart a little in the crowded central plain; each stays close to its true spot
+const geoPos = (() => {
+  const o = Calc.weights(DATA, P.map(() => true), 'trips'), r = d3.scaleSqrt([0, d3.max(o)], [3, 20]);
+  const sim = trueGeo.map(([x, y], i) => ({ x, y, tx: x, ty: y, r: r(o[i]) }));
+  d3.forceSimulation(sim).force('c', d3.forceCollide(d => d.r * .75)).force('x', d3.forceX(d => d.tx).strength(.25)).force('y', d3.forceY(d => d.ty).strength(.25)).stop().tick(120);
+  return sim.map(d => [d.x, d.y]);
+})();
+const pxPerKm = (proj([101, 15])[0] - proj([100, 15])[0]) / 107.5;  // 1° longitude at 15°N ≈ 107.5 km
 let netPos = null;
 function networkPositions() {
   if (netPos) return netPos;
@@ -263,13 +296,14 @@ function networkPositions() {
   return (netPos = sim.map(d => [sx(d.x), sy(d.y)]));
 }
 const pos = () => (S.layout === 'geo' ? geoPos : networkPositions());
-let framed = null;
-function frame() {  // open the map on the busy part of the country; the far south stays reachable by zooming out
-  if (framed === S.layout) return; framed = S.layout;
-  if (S.layout !== 'geo') { svg.transition().duration(500).call(zoomer.transform, d3.zoomIdentity); return; }
-  const pts = geoPos.filter((_, i) => nodes[i].lat > 11.5), xs = d3.extent(pts, q => q[0]), ys = d3.extent(pts, q => q[1]);
-  const k = Math.min(VW / (xs[1] - xs[0] + 90), VH / (ys[1] - ys[0] + 90)), cx = (xs[0] + xs[1]) / 2, cy = (ys[0] + ys[1]) / 2;
-  svg.transition().duration(500).call(zoomer.transform, d3.zoomIdentity.translate(VW / 2 - k * cx, VH / 2 - k * cy).scale(k));
+// Camera: with province ids, fit them plus the service radius around each; otherwise the busy part of
+// the country (the far south stays reachable by zooming out).
+function frame(ids) {
+  if (S.layout !== 'geo') { svg.transition().duration(600).call(zoomer.transform, d3.zoomIdentity); return; }
+  const pts = ids && ids.length ? ids.map(i => geoPos[i]) : geoPos.filter((_, i) => nodes[i].lat > 11.5);
+  const pad = ids && ids.length ? (S.radius + 20) * pxPerKm : 45, xs = d3.extent(pts, q => q[0]), ys = d3.extent(pts, q => q[1]);
+  const k = Math.max(.7, Math.min(1.8, VW / (xs[1] - xs[0] + 2 * pad), VH / (ys[1] - ys[0] + 2 * pad))), cx = (xs[0] + xs[1]) / 2, cy = (ys[0] + ys[1]) / 2;
+  svg.transition().duration(600).call(zoomer.transform, d3.zoomIdentity.translate(VW / 2 - k * cx, VH / 2 - k * cy).scale(k));
 }
 const confColor = d3.scaleLinear([0.35, 0.8, 1], ['#FF6B6B', '#FFD166', '#A3E635']).clamp(true);
 
@@ -277,13 +311,15 @@ function drawMap() {
   const p = pos(), cov = S.hubs.length ? Calc.covered(S.hubs, A) : null;
   gLand.transition().duration(500).attr('opacity', S.layout === 'geo' ? 1 : 0);
   const o = outT(), inn = inT(), size = S.sizeBy === 'out' ? o : S.sizeBy === 'in' ? inn : o.map((v, i) => v + inn[i]);
-  const r = d3.scaleSqrt([0, d3.max(size)], [3, 26]);
-  // reach rings (map layout only: they are distances)
-  const rings = S.layout === 'geo' ? S.hubs.map(h => {
+  const r = d3.scaleSqrt([0, d3.max(size)], [3, 20]);
+  // reach rings (map layout only: they are distances); pinned set A = dashed, hollow
+  const ring = (h, pin) => {
     const n = nodes[h], c = proj([n.lng, n.lat]), pn = proj([n.lng, n.lat + S.radius / 111]), pe = proj([n.lng + S.radius / (111 * Math.cos(n.lat * Math.PI / 180)), n.lat]);
-    return { h, cx: c[0], cy: c[1], rx: Math.abs(pe[0] - c[0]), ry: Math.abs(pn[1] - c[1]) };
-  }) : [];
-  gRings.selectAll('ellipse').data(rings, d => d.h).join(en => en.append('ellipse').attr('cx', d => d.cx).attr('cy', d => d.cy).attr('rx', 0).attr('ry', 0)).attr('fill', 'rgba(255,181,71,.07)').attr('stroke', '#FFB547').attr('stroke-width', 1.5)
+    return { key: (pin ? 'p' : 'h') + h, pin, cx: c[0], cy: c[1], rx: Math.abs(pe[0] - c[0]), ry: Math.abs(pn[1] - c[1]) };
+  };
+  const rings = S.layout === 'geo' ? [...S.hubs.map(h => ring(h, false)), ...(S.mode === 'explore' && S.pin ? S.pin.map(h => ring(h, true)) : [])] : [];
+  gRings.selectAll('ellipse').data(rings, d => d.key).join(en => en.append('ellipse').attr('cx', d => d.cx).attr('cy', d => d.cy).attr('rx', 0).attr('ry', 0))
+    .attr('fill', d => (d.pin ? 'none' : 'rgba(255,181,71,.12)')).attr('stroke', d => (d.pin ? '#EAF6FF' : '#FFB547')).attr('stroke-width', d => (d.pin ? 1.5 : 2.5)).attr('stroke-dasharray', d => (d.pin ? '6 5' : null))
     .transition().duration(800).ease(d3.easeCubicOut).attr('cx', d => d.cx).attr('cy', d => d.cy).attr('rx', d => d.rx).attr('ry', d => d.ry);
   // flows
   let fl = [];
@@ -307,16 +343,19 @@ function drawMap() {
   // nodes
   const fade = i => (cov && !cov[i] ? .25 : S.focus.length && !S.focus.includes(i) ? .35 : 1);
   gNodes.selectAll('circle').data(nodes.map((n, i) => i), i => i).join(en => en.append('circle').attr('cx', i => p[i][0]).attr('cy', i => p[i][1])
-      .on('mousemove', (e, i) => tip(e, i)).on('mouseenter', (e, i) => { S.hover = i; applyHover(); }).on('mouseleave', () => { tipEl.hidden = true; S.hover = null; applyHover(); }).on('click', (e, i) => clickNode(i))
+      .on('mousemove', (e, i) => tip(e, i)).on('mouseenter', (e, i) => { S.hover = i; applyHover(); }).on('mouseleave', () => { tipEl.hidden = true; S.hover = null; applyHover(); }).on('click', (e, i) => { if (e.pointerType === 'touch') tip(e, i); clickNode(i); })
       .attr('tabindex', 0).attr('role', 'button').attr('aria-label', i => nodes[i].en).on('keydown', (e, i) => { if (e.key === 'Enter') clickNode(i); }))
     .attr('fill', i => (S.colorBy === 'g' ? GC[nodes[i].g] : confColor(nodes[i].conf)))
     .attr('stroke', i => (S.hubs.includes(i) ? '#FFB547' : i === S.sel ? '#37E2D5' : 'rgba(4,20,34,.9)')).attr('stroke-width', i => (S.hubs.includes(i) || i === S.sel ? 3 : 1))
     .attr('class', i => (S.hubs.includes(i) ? 'hub' : null)).style('cursor', 'pointer')
     .transition().duration(500).attr('cx', i => p[i][0]).attr('cy', i => p[i][1]).attr('r', i => r(size[i])).attr('opacity', fade);
-  // labels: hubs, selection, story focus
-  const lab = [...new Set([...S.hubs, ...(S.sel != null ? [S.sel] : []), ...S.focus])];
-  gLabels.selectAll('text').data(lab, i => i).join('text').attr('class', 'lbl').text(i => (S.hubs.includes(i) ? '★ ' : '') + nodes[i].en)
-    .transition().duration(500).attr('x', i => p[i][0] + 10).attr('y', i => p[i][1] - 10);
+  // labels: hubs, selection, story focus, plus the 10 biggest circles so the map can be read without hovering
+  const major = [...new Set([...S.hubs, ...(S.sel != null ? [S.sel] : []), ...S.focus])], top = Calc.topK(size, 10).filter(i => !major.includes(i));
+  LBL_MINOR = i => top.includes(i);
+  gLabels.selectAll('text').data([...top, ...major], i => i).join('text').attr('class', 'lbl').text(i => (S.hubs.includes(i) ? '★ ' : '') + nm(i))
+    .attr('opacity', i => (LBL_MINOR(i) ? .7 * fade(i) : 1))
+    .transition().duration(500).attr('x', i => p[i][0] + r(size[i]) * .7 + 3).attr('y', i => p[i][1] - r(size[i]) * .7 - 2);
+  labelScale();
   // region glow: blurred hull around each market group
   const hulls = S.hulls ? d3.range(4).map(g => ({ g, h: d3.polygonHull(nodes.map((n, i) => (n.g === g ? p[i] : null)).filter(Boolean)) })).filter(d => d.h) : [];
   gHull.selectAll('path').data(hulls, d => d.g).join('path').attr('fill', d => GC[d.g]).attr('opacity', .16).attr('d', d => 'M' + d.h.join('L') + 'Z');
@@ -373,14 +412,14 @@ function legend() {
   el.innerHTML = (S.colorBy === 'g' ? DATA.groups.map((g, k) => `<span><i style="background:${GC[k]}"></i>${g}</span>`).join('')
     : `<span><i style="background:#A3E635"></i>Stable (≥ 0.80)</span><span><i style="background:#FFD166"></i>Moves sometimes</span><span><i style="background:#FF6B6B;color:#FF6B6B"></i>Moves often</span>`)
     + `<span>Circle size: ${document.getElementById('sizeBy').selectedOptions[0].text.toLowerCase()}</span>`
-    + (S.hubs.length ? `<span>White ring = hub; faded = out of reach (${S.radius} km)</span>` : '')
-    + '<span>Scroll or pinch to zoom; drag to pan</span>'
+    + (S.hubs.length ? `<span>Amber ring = ${S.radius} km reach; faded = out of reach</span>` + (S.mode === 'explore' && S.pin ? '<span>Dashed ring = pinned set A</span>' : '') : '')
+    + '<span>Ctrl/⌘ + scroll or pinch to zoom; drag to pan</span>'
     + (S.layout === 'net' ? '<span>Network view: provinces that trade more sit closer; distance on screen is not km</span>' : '');
 }
 const tipEl = document.getElementById('tip');
 function tip(e, i) {
   const n = nodes[i], o = outT()[i], inn = inT()[i];
-  tipEl.innerHTML = `<b>${n.en}</b> <span class="thai muted">${n.th}</span><br>${DATA.groups[n.g]}<br>Trips start here: <b class="num">${fmt0(Math.round(o))}</b><br>Trips end here: <b class="num">${fmt0(Math.round(inn))}</b>`;
+  tipEl.innerHTML = `<b>${nm(i)}</b> <span class="muted">${S.lang === 'th' ? n.en : n.th}</span><br>${DATA.groups[n.g]}<br>Trips start here: <b class="num">${fmt0(Math.round(o))}</b><br>Trips end here: <b class="num">${fmt0(Math.round(inn))}</b>`;
   tipEl.hidden = false; tipEl.style.left = Math.min(e.clientX + 14, innerWidth - 270) + 'px'; tipEl.style.top = e.clientY + 14 + 'px';
 }
 function clickNode(i) {
@@ -394,14 +433,14 @@ function toggleHub(i) { S.hubs = S.hubs.includes(i) ? S.hubs.filter(h => h !== i
 function barsHTML(rows, max = 100, mark = null, fmt = pct) {
   return `<div class="bars">${rows.map(r => `<div class="bar"><span>${r.label}</span><span class="track"><span class="fill" style="width:${Math.max(0, Math.min(100, 100 * r.v / max))}%;background:${r.color || '#37E2D5'}"></span>${mark != null ? `<span class="mark" style="left:${100 * mark / max}%"></span>` : ''}</span><span class="num" style="text-align:right">${fmt(r.v)}</span></div>`).join('')}</div>`;
 }
-function liveMetrics() {
-  const h = S.hubs, tot = W.reduce((a, b) => a + b, 0);
+function liveMetrics(h = S.hubs) {
+  const tot = W.reduce((a, b) => a + b, 0);
   const c = h.length ? Calc.coverage(h, W, A) : 0, l = h.length ? Calc.lane(h, T, A) : 0;
   return { c, l, perMonth: (c / 100) * tot / DATA.months, over: h.length ? Calc.overlap(h, A) : 0, groups: Calc.groupCoverage(h, W, A, nodes.map(n => n.g)) };
 }
 const driveText = R => `${R} km straight line ≈ ${Math.round(R * road.road_to_straight_median)} km by road ≈ ${(R * minPerKm / 60).toFixed(1)} h drive`;
 const unit = () => (S.measure === 'tons' ? 'tons' : 'trips');
-const hubNames = h => h.map(i => nodes[i].en).join(' + ');
+const hubNames = h => h.map(nm).join(' + ');
 
 // ---------------------------------------------------------------- explore panel
 function plannerHTML() {
@@ -410,7 +449,11 @@ function plannerHTML() {
   return `<div class="card stack">
     <div class="label">Hub planner</div>
     <p class="hint">Click provinces on the map to add or remove hubs (up to 5). Every number below is recalculated in your browser.</p>
-    <div class="chips">${S.hubs.map(i => `<span class="chip hub">★ ${nodes[i].en}<button aria-label="Remove ${nodes[i].en}" data-rm="${i}">×</button></span>`).join('') || '<span class="muted">No hubs yet</span>'}</div>
+    <div class="chips">${S.hubs.map(i => `<span class="chip hub">★ ${nm(i)}<button aria-label="Remove ${nodes[i].en}" data-rm="${i}">×</button></span>`).join('') || '<span class="muted">No hubs yet</span>'}</div>
+    <div class="row2"><button class="primary" data-act="best2">Find best 2</button><button class="primary" data-act="best3">Find best 3</button><button data-act="greedy">Play greedy</button></div>
+    <div><div class="label" style="margin-bottom:6px">Load a hub set</div><div class="row2">
+      <button data-preset="A_2">Model A · 2 hubs</button><button data-preset="A_3">Model A · 3 hubs</button><button data-preset="B_3_0.5">Model B</button>
+      <button data-preset="rank_tot">Top 3 by all trips</button><button data-preset="rank_out">Top 3 by trips that start there</button><button data-preset="random">Random 3</button><button data-preset="clear">Clear</button></div></div>
     <div class="metrics">
       <div class="metric"><b class="num" data-k="c" data-v="${m.c}" data-f="pct">${pct(m.c)}</b><span>of ${unit()} start within reach</span></div>
       <div class="metric"><b class="num" data-k="pm" data-v="${m.perMonth}" data-f="int">${fmt0(Math.round(m.perMonth))}</b><span>${unit()} a month within reach</span></div>
@@ -418,15 +461,26 @@ function plannerHTML() {
       <div class="metric"><b class="num">${m.over}</b><span>provinces near two hubs (overlap)</span></div>
     </div>
     <div class="note">${bestTxt}</div>
+    ${compareHTML(m)}
     <div><div class="label" style="margin-bottom:6px">Reach in each market group</div>${barsHTML(m.groups.map((v, g) => ({ label: DATA.groups[g], v, color: GC[g] })), 100, 50)}<div class="note">Line = 50%, the minimum Model B requires.</div></div>
+    <label><input type="checkbox" id="laneView" ${S.laneView ? 'checked' : ''}> Show return-load flows</label>
+    <details class="settings stack" ${S.settingsOpen ? 'open' : ''}><summary class="label">Settings: radius ${S.radius} km · ${unit()} · ${S.prod.filter(Boolean).length} of ${P.length} goods</summary>
     <div><div class="label">Service radius: <span class="num">${S.radius}</span> km</div><input id="radius" type="range" min="100" max="200" step="5" value="${S.radius}" aria-label="Service radius in km"><div class="note">${driveText(S.radius)} (from the GPS data)</div></div>
     <div class="row2"><span class="label">Weigh by</span><span class="seg"><button data-measure="trips" aria-pressed="${S.measure === 'trips'}">Trips</button><button data-measure="tons" aria-pressed="${S.measure === 'tons'}">Tons</button></span></div>
     <div><div class="label" style="margin-bottom:4px">Goods we carry</div><div class="prodlist">${P.map((p, k2) => `<label><input type="checkbox" data-prod="${k2}" ${S.prod[k2] ? 'checked' : ''}> ${p}</label>`).join('')}</div></div>
-    <div><div class="label" style="margin-bottom:6px">Load a hub set</div><div class="row2">
-      <button data-preset="A_2">Model A · 2 hubs</button><button data-preset="A_3">Model A · 3 hubs</button><button data-preset="B_3_0.5">Model B</button>
-      <button data-preset="rank_tot">Top 3 by all trips</button><button data-preset="rank_out">Top 3 by trips that start there</button><button data-preset="random">Random 3</button><button data-preset="clear">Clear</button></div></div>
-    <div class="row2"><button class="primary" data-act="best2">Find best 2</button><button class="primary" data-act="best3">Find best 3</button><button data-act="greedy">Play greedy</button><label><input type="checkbox" id="laneView" ${S.laneView ? 'checked' : ''}> Show return-load flows</label></div>
+    </details>
+    <div class="row2"><button data-act="copy">Copy link to this view</button></div>
   </div>`;
+}
+// Pin the current set as A, then change hubs and compare side by side.
+function compareHTML(m) {
+  if (!S.pin) return S.hubs.length ? '<div class="row2"><button data-act="pin">Pin as A to compare</button></div>' : '';
+  const a = liveMetrics(S.pin), row = (l, x, y, f = pct) => `<tr><td>${l}</td><td class="n">${f(x)}</td><td class="n">${f(y)}</td><td class="n">${x === y ? '' : (y > x ? '+' : '−') + f(Math.abs(y - x))}</td></tr>`, i0 = v => fmt0(Math.round(v));
+  return `<div class="stack"><div class="row2" style="justify-content:space-between"><span class="label">Compare</span><button data-act="unpin">Unpin</button></div>
+    <div class="note"><b>A</b> (dashed rings): ${hubNames(S.pin)}<br><b>Now</b>: ${hubNames(S.hubs) || 'no hubs'}</div>
+    <div class="tablewrap cmp"><table><thead><tr><th></th><th class="n">A</th><th class="n">Now</th><th class="n">Change</th></tr></thead><tbody>
+    ${row(`${unit()} within reach`, a.c, m.c)}${row(`${unit()} a month`, a.perMonth, m.perMonth, i0)}${row('Return loads', a.l, m.l)}${DATA.groups.map((g, k) => row(g, a.groups[k], m.groups[k])).join('')}
+    </tbody></table></div></div>`;
 }
 function provinceHTML() {
   if (S.sel == null) return `<div class="card stack"><div class="label">Province</div><p class="muted">Click any province on the map to see its profile.</p></div>`;
@@ -437,7 +491,7 @@ function provinceHTML() {
   const mx = Math.max(...dests.map(d => d.v), ...origs.map(d => d.v), 1);
   return `<div class="card stack">
     <div class="label">Province</div>
-    <div><h2>${n.en}</h2><div class="thai muted">${n.th}</div></div>
+    <div><h2 class="${S.lang === 'th' ? 'thai' : ''}">${nm(i)}</h2><div class="muted ${S.lang === 'th' ? '' : 'thai'}">${S.lang === 'th' ? n.en : n.th}</div></div>
     <div class="row2"><span class="chip"><span class="dot" style="background:${GC[n.g]}"></span>${DATA.groups[n.g]}&nbsp;</span>
       <span class="chip ${n.conf < .8 ? 'flag' : ''}">Group stability ${n.conf.toFixed(2)}${n.conf < .8 ? ' · moves between runs' : ''}&nbsp;</span></div>
     <div class="metrics">
@@ -446,10 +500,10 @@ function provinceHTML() {
       <div class="metric"><b class="num">${inn[i] ? (o[i] / inn[i]).toFixed(2) : '–'}</b><span>out ÷ in (below 1 = mostly a destination)</span></div>
       <div class="metric"><b class="num">${n.partners}</b><span>provinces it trades with (of 76)</span></div>
     </div>
-    <div><div class="label" style="margin-bottom:6px">Where its loads go</div>${barsHTML(dests.map(d => ({ label: nodes[d.j].en, v: d.v })), mx, null, v => fmt0(Math.round(v)))}</div>
-    <div><div class="label" style="margin-bottom:6px">Where its arrivals come from</div>${barsHTML(origs.map(d => ({ label: nodes[d.j].en, v: d.v, color: '#7F9AAE' })), mx, null, v => fmt0(Math.round(v)))}</div>
+    <div><div class="label" style="margin-bottom:6px">Where its loads go</div>${barsHTML(dests.map(d => ({ label: nm(d.j), v: d.v })), mx, null, v => fmt0(Math.round(v)))}</div>
+    <div><div class="label" style="margin-bottom:6px">Where its arrivals come from</div>${barsHTML(origs.map(d => ({ label: nm(d.j), v: d.v, color: '#7F9AAE' })), mx, null, v => fmt0(Math.round(v)))}</div>
     <div class="note">PageRank rank ${rank(nodes.map(x => x.pr))} (receives from provinces that receive a lot) · betweenness rank ${rank(nodes.map(x => x.btw))} (sits between trading partners; not a road route)</div>
-    <div class="note">${S.hubs.length ? (near.length ? `Within ${S.radius} km of: ${near.map(h => nodes[h].en).join(', ')}` : `Not within ${S.radius} km of any hub`) : 'Add hubs in the planner to see if it is within reach.'}</div>
+    <div class="note">${S.hubs.length ? (near.length ? `Within ${S.radius} km of: ${near.map(nm).join(', ')}` : `Not within ${S.radius} km of any hub`) : 'Add hubs in the planner to see if it is within reach.'}</div>
     <div class="row2"><button class="primary" data-addhub="${i}">${S.hubs.includes(i) ? 'Remove hub here' : 'Make this a hub'}</button></div>
   </div>`;
 }
@@ -526,7 +580,9 @@ function storyPanel() {
     <div class="dots">${STEPS.map((_, k) => `<button aria-label="Go to step ${k + 1}" data-goto="${k}" ${k === S.step ? 'aria-current="step"' : ''}></button>`).join('')}</div>
   </div>`;
 }
-function goStep(k) { cancel(); S.step = Math.max(0, Math.min(STEPS.length - 1, k)); STEPS[S.step].set(); render(); }
+// What each story step zooms to (step index → provinces); unlisted steps use the default view.
+const camFor = k => ({ 2: ['Suphanburi', 'Lopburi'].map(byEn), 3: ['Chonburi', 'Samut Prakan'].map(byEn), 10: DATA.models['B_3_0.5'] }[k] || (k >= 6 ? DATA.models.A_3 : null));
+function goStep(k) { cancel(); S.step = Math.max(0, Math.min(STEPS.length - 1, k)); STEPS[S.step].set(); render(); frame(camFor(S.step)); }
 
 // ---------------------------------------------------------------- findings tabs
 const FT = [['groups', 'Market groups'], ['shape', 'Network shape'], ['ranking', 'Set vs ranking'], ['sure', 'How sure are we'], ['lanes', 'Return loads + graph DB'], ['ab', 'Model A vs B'], ['method', 'Data and method']];
@@ -649,6 +705,7 @@ function syncControls() {
   document.getElementById('layGeo').setAttribute('aria-pressed', S.layout === 'geo'); document.getElementById('layNet').setAttribute('aria-pressed', S.layout === 'net');
   document.getElementById('sizeBy').value = S.sizeBy; document.getElementById('colorBy').value = S.colorBy;
   document.getElementById('nFlows').value = S.nFlows; document.getElementById('nFlowsV').textContent = S.nFlows; document.getElementById('arrows').checked = S.arrows; document.getElementById('hulls').checked = S.hulls;
+  document.body.classList.toggle('lang-th', S.lang === 'th'); const lb = document.getElementById('lang'); lb.setAttribute('aria-pressed', S.lang === 'th'); lb.textContent = S.lang === 'th' ? 'EN' : 'ไทย';
   document.getElementById('modeStory').setAttribute('aria-pressed', S.mode === 'story'); document.getElementById('modeExplore').setAttribute('aria-pressed', S.mode === 'explore');
 }
 const PREV = {};
@@ -660,19 +717,40 @@ function tweenTo(el, key, to, f) {
 function tweenNums(scope) { scope.querySelectorAll('[data-v]').forEach(el => tweenTo(el, 'p' + el.dataset.k, +el.dataset.v, el.dataset.f)); }
 function updateKPIs() {
   const m = liveMetrics(), has = S.hubs.length > 0;
-  [['kReach', m.c, 'pct'], ['kMonth', m.perMonth, 'int'], ['kLane', m.l, 'pct']].forEach(([id, v, f]) => { const el = document.getElementById(id); if (has) tweenTo(el, id, v, f); else { PREV[id] = 0; el.textContent = '–'; } });
+  [['kReach', m.c, 'pct'], ['kMonth', m.perMonth, 'int'], ['kLane', m.l, 'pct']].forEach(([id, v, f]) => { const el = document.getElementById(id); el.classList.toggle('none', !has); if (has) tweenTo(el, id, v, f); else { PREV[id] = 0; el.textContent = S.mode === 'explore' ? 'pick hubs' : '–'; } });
 }
 function render() {
-  syncControls(); drawMap(); frame();
+  syncControls(); drawMap(); writeHash();
   const panel = document.getElementById('panel');
   panel.innerHTML = S.mode === 'story' ? storyPanel() : explorePanel();
   tweenNums(panel); updateKPIs();
   findingsBody();
 }
 document.getElementById('modeStory').onclick = () => { S.mode = 'story'; goStep(S.step); };
+document.getElementById('resetView').onclick = () => frame(S.mode === 'story' ? camFor(S.step) : null);
+document.getElementById('lang').onclick = () => { S.lang = S.lang === 'en' ? 'th' : 'en'; render(); };
+document.getElementById('panel').addEventListener('toggle', e => { if (e.target.matches('details.settings')) S.settingsOpen = e.target.open; }, true);
+svg.on('pointerdown.tip', e => { if (e.target.tagName !== 'circle') tipEl.hidden = true; });
+if (innerWidth <= 600) document.getElementById('mapopts').open = false;
+// Shareable link: the view lives in location.hash. Read once on load; everything from it is checked.
+function writeHash() {
+  const q = S.mode === 'story' ? { step: S.step + 1 } : { mode: 'explore', hubs: S.hubs.join(','), r: S.radius, by: S.measure, goods: S.prod.map(Number).join(''), ...(S.pin ? { pin: S.pin.join(',') } : {}) };
+  if (S.lang === 'th') q.lang = 'th';
+  history.replaceState(null, '', '#' + new URLSearchParams(q));
+}
+function readHash() {
+  const q = new URLSearchParams(location.hash.slice(1)), ids = v => [...new Set((v || '').split(',').filter(Boolean).map(Number))].filter(i => Number.isInteger(i) && i >= 0 && i < N).slice(0, 5);
+  if (q.get('lang') === 'th') S.lang = 'th';
+  if (q.get('mode') !== 'explore') { const st = parseInt(q.get('step'), 10); return { step: Number.isInteger(st) ? st - 1 : 0 }; }
+  const r = +q.get('r'), g = q.get('goods') || '';
+  Object.assign(S, { mode: 'explore', hubs: ids(q.get('hubs')), radius: r >= 100 && r <= 200 ? Math.round(r / 5) * 5 : 150, measure: q.get('by') === 'tons' ? 'tons' : 'trips' });
+  const pin = ids(q.get('pin')); S.pin = pin.length ? pin : null;
+  if (new RegExp(`^[01]{${P.length}}$`).test(g) && g.includes('1')) S.prod = [...g].map(c => c === '1');
+  return null;
+}
 document.getElementById('modeExplore').onclick = () => { setAuto(false); cancel(); S.mode = 'explore'; S.tab = 'planner'; render(); };
-document.getElementById('layGeo').onclick = () => { S.layout = 'geo'; render(); };
-document.getElementById('layNet').onclick = () => { S.layout = 'net'; render(); };
+document.getElementById('layGeo').onclick = () => { S.layout = 'geo'; render(); frame(); };
+document.getElementById('layNet').onclick = () => { S.layout = 'net'; render(); frame(); };
 document.getElementById('sizeBy').onchange = e => { S.sizeBy = e.target.value; render(); };
 document.getElementById('colorBy').onchange = e => { S.colorBy = e.target.value; render(); };
 document.getElementById('nFlows').oninput = e => { S.nFlows = +e.target.value; syncControls(); drawMap(); };
@@ -700,6 +778,9 @@ document.getElementById('panel').addEventListener('click', e => {
     S.hubs = p === 'clear' ? [] : p === 'random' ? d3.shuffle(d3.range(N)).slice(0, 3) : p === 'rank_tot' ? Calc.topK(o.map((v, i) => v + inn[i]), 3) : p === 'rank_out' ? Calc.topK(o, 3) : DATA.models[p].slice();
     render();
   } else if (t.dataset.act === 'best2' || t.dataset.act === 'best3') { S.hubs = Calc.best(t.dataset.act === 'best2' ? 2 : 3, W, A).hubs; render(); }
+  else if (t.dataset.act === 'pin') { S.pin = S.hubs.slice(); render(); }
+  else if (t.dataset.act === 'unpin') { S.pin = null; render(); }
+  else if (t.dataset.act === 'copy') { navigator.clipboard?.writeText(location.href).then(() => { t.textContent = 'Link copied ✓'; }, () => { t.textContent = 'Copy failed: use the address bar'; }); }
   else if (t.dataset.act === 'greedy') { cancel(); const steps = Calc.greedy(Math.max(3, S.hubs.length || 3), W, A); S.hubs = []; render(); steps.forEach((st, k) => later(800 * (k + 1), () => { S.hubs = st.hubs; render(); })); }
 });
 document.getElementById('panel').addEventListener('input', e => {
@@ -714,7 +795,7 @@ document.addEventListener('keydown', e => {
   if (S.mode !== 'story' || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
   if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goStep(S.step + 1); } if (e.key === 'ArrowLeft') goStep(S.step - 1);
 });
-recompute(); goStep(0);
+{ const st = readHash(); recompute(); if (st) goStep(st.step); else { render(); frame(); } }
 })();
 </script>
 </body>
