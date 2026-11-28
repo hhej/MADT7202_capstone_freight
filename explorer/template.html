@@ -85,6 +85,18 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .kpi b.none { color: var(--muted); font: 500 12px/1.5 var(--body); }
 .lang-th svg .lbl, .lang-th .chip, .lang-th #tip b:first-child { font-family: var(--thai); }
 details.settings > summary { cursor: pointer; }
+.tldr { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.tldr > div { padding: 12px 16px; border-radius: 16px; background: var(--glass); border: 1px solid var(--border); display: grid; gap: 4px; align-content: start; }
+.tldr p { margin: 0; font-size: 14px; }
+.tldr .close { position: absolute; top: -8px; right: -6px; padding: 0 8px; border-radius: 50%; font-size: 15px; line-height: 24px; }
+@media (max-width: 800px) { .tldr { grid-template-columns: minmax(0, 1fr); } }
+body:has(#tldr:not([hidden])) #map { height: min(calc(100vh - 400px), 820px); }  /* keep the map on screen under the summary strip */
+dfn.term { font-style: normal; border-bottom: 1px dotted var(--muted); cursor: help; }
+.faq { display: grid; gap: 8px; max-width: 900px; }
+.faq details { background: var(--glass-2); border: 1px solid var(--border); border-radius: 14px; padding: 10px 14px; }
+.faq summary { cursor: pointer; font: 600 15px/1.4 var(--display); }
+.faq details > div { display: grid; gap: 8px; padding-top: 8px; }
+.faq p, .faq ul { margin: 0; }
 .cmp td:first-child { color: var(--muted); }
 @media (max-width: 600px) {
   header.top { position: static; }  /* sticky header would eat a third of a phone screen */
@@ -171,7 +183,7 @@ footer a { color: var(--cyan); }
 <header class="top">
   <div class="row">
     <div class="titles">
-      <div class="eyebrow">Hub location study · MADT 7202</div>
+      <div class="eyebrow">Hub location study · Thai farm &amp; food freight</div>
       <h1>Where should we open our first trucking hubs?</h1>
     </div>
     <div class="kpis" aria-live="polite">
@@ -191,6 +203,13 @@ footer a { color: var(--cyan); }
     </div>
   </div>
 </header>
+
+<section class="tldr" id="tldr" aria-label="30-second summary">
+  <div><span class="label">The question</span><p>A new truck carrier can afford 2–3 hubs. In which provinces will it win the most loads?</p></div>
+  <div><span class="label">The answer</span><p id="tldrAnswer"></p></div>
+  <div><span class="label">Why trust it</span><p id="tldrTrust"></p></div>
+  <button class="close" id="tldrClose" aria-label="Hide the summary" title="Hide the summary">×</button>
+</section>
 
 <div class="layout">
   <div class="card mapcard">
@@ -248,7 +267,7 @@ const fmt0 = d3.format(','), pct = v => v.toFixed(1) + '%', pct0 = v => Math.rou
 const byEn = en => nodes.findIndex(n => n.en === en);
 const road = DATA.road, minPerKm = road.minutes_median_pairs_130_170km / 150;
 const S = { mode: 'story', layout: 'geo', sizeBy: 'out', colorBy: 'g', nFlows: 60, arrows: false, prod: P.map(() => true), measure: 'trips',
-            radius: 150, hubs: [], sel: null, tab: 'planner', ftab: 'groups', step: 0, laneView: false, focus: [], moving: true, hulls: false, hover: null, auto: false, lang: 'en', pin: null, settingsOpen: false };
+            radius: 150, hubs: [], sel: null, tab: 'planner', ftab: 'faq', step: 0, laneView: false, focus: [], moving: true, hulls: false, hover: null, auto: false, lang: 'en', pin: null, settingsOpen: false };
 const nm = i => (S.lang === 'th' ? nodes[i].th : nodes[i].en);
 let W, T, A, timers = [];
 const cancel = () => { timers.forEach(clearTimeout); timers = []; };
@@ -530,9 +549,22 @@ function explorePanel() {
 
 // ---------------------------------------------------------------- story
 const F = DATA.facts, seed3 = m => DATA.seeding.find(s => s.k === 3 && s.method === m).coverage;
+const outTop3 = () => DATA.seeding.find(s => s.k === 3 && s.method === 'Top by out-strength (origin trips)');
+// Plain-language meanings: the "Words used here" table and the dotted-underline hints both read this.
+const GLOSS = {
+  reach: ['Reach', 'Share of trips that start within the radius of a hub'],
+  return: ['Return loads', 'Trips whose start and end are both near a hub, so a truck can find a load home'],
+  group: ['Market group', 'Provinces that trade more with each other than with others (community detection)'],
+  modularity: ['Modularity (Q)', 'How much more trade stays inside groups than chance would give'],
+  greedy: ['Greedy', 'Add the hub that helps most, one at a time, never undoing a pick'],
+  optimiser: ['Optimiser', 'A solver that compares whole sets of hubs and returns the set with the most reach (here an integer program, MILP)'],
+  outstrength: ['Trips that start there', 'How many trips begin in a province: what a pickup hub can win'],
+};
+const term = (word, key) => `<dfn class="term" tabindex="0" data-g="${key}">${word}</dfn>`;
 const STEPS = [
   { t: 'Where should we open our first trucking hubs?', set() { setView({ hubs: [], layout: 'geo', sizeBy: 'out', nFlows: 60 }); },
     b: () => `<p>We are a new carrier for farm and food goods. The budget allows 2 or 3 hubs. Each hub sends trucks to pick up loads within about 150 km.</p>
+      <p><b>150 km limits where trucks pick up, not where they deliver:</b> a load picked up near a hub can go anywhere in Thailand.</p>
       <p>Thailand has 77 provinces, so there are 2,926 ways to pick 2 and 73,150 ways to pick 3. Which set should we choose?</p>
       <p class="muted">Circles are provinces, sized by trips that start there. Lines are the busiest flows. Use → or the buttons to step through.</p>` },
   { t: `${F.trips} truck trips in four months`, set() { setView({ hubs: [], nFlows: 150, sizeBy: 'out' }); },
@@ -549,27 +581,28 @@ const STEPS = [
   { t: 'We treat freight as a network', set() { setView({ layout: 'net', arrows: false, sizeBy: 'tot', nFlows: 120, sel: null, focus: [] }); },
     b: () => `<ul><li><b>Actors:</b> 77 provinces</li><li><b>Ties:</b> truck trips from one province to another</li><li><b>Structure:</b> market groups, key provinces, overlap between hubs</li><li><b>Decision:</b> a set of 2–3 hubs</li></ul>
       <p>This is a group-level decision: a hub's value depends on where the other hubs are. In this view, provinces that trade more sit closer together.</p>` },
-  { t: 'Four market groups, checked the course way', set() { setView({ layout: 'geo', colorBy: 'g', sizeBy: 'out', nFlows: 80, hulls: true }); },
+  { t: 'Four market groups, and they are real', set() { setView({ layout: 'geo', colorBy: 'g', sizeBy: 'out', nFlows: 80, hulls: true }); },
     b: () => { const c2 = DATA.check2[0];
-      return `<p>Louvain community detection finds 4 groups: ${DATA.groups.join(', ')}.</p>
+      return `<p>Louvain community detection finds 4 ${term('market groups', 'group')}: ${DATA.groups.join(', ')}.</p>
       <ul><li>None of ${fmt0(1000)} randomly rewired copies scored as high as our network (p = ${F.c1000_p}), so the groups are real.</li><li>Leiden finds exactly the same groups.</li>
       <li>${F.stable} of 77 provinces stay in the same group in every run; ${F.flagged} Central provinces move, Saraburi among them.</li></ul>
       <p class="muted">Switch Colour to "Group stability" to see which provinces move.</p>`; } },
   { t: 'Model A: the best set of hubs', set() { setView({ hubs: [], sizeBy: 'out', nFlows: 40 }); DATA.models.A_3.forEach((h, k) => later(700 * (k + 1), () => { S.hubs = DATA.models.A_3.slice(0, k + 1); render(); })); },
-    b: () => `<p>An optimiser checks sets of provinces and keeps the one that reaches the most trips that start within 150 km, counting each trip once. We also checked all 73,150 sets of three: this is the best one.</p>
+    b: () => `<p>An ${term('optimiser', 'optimiser')} checks sets of provinces and keeps the one that reaches the most trips that start within 150 km, counting each trip once. We also checked all 73,150 sets of three: this is the best one.</p>
       <ul><li>2 hubs, Phitsanulok + Saraburi: <b>${F.A2}</b></li><li>3 hubs, + Maha Sarakham: <b>${F.A3}</b> (about ${F.per_month} trips a month)</li></ul>
       <p>One hub lands in each of North, Central and Northeast, without the model being told to.</p>` },
   { t: 'Better than any ranking', set() { setView({ hubs: Calc.topK(nodes.map((_, i) => outT()[i] + inT()[i]), 3), nFlows: 40 }); later(2200, () => { S.hubs = DATA.models.A_3.slice(); render(); }); },
     b: () => `<p>Same budget, same 150 km rule, different ways to pick 3 hubs. The map first shows the top 3 by total trips, then Model A.</p>
       ${barsHTML([['Random set (average)', 'Random (mean of all sets)', C.dim], ['Top 3 by all trips', 'Top by strength (in+out)', C.flow], ['Top 3 by trips that start there', 'Top by out-strength (origin trips)', C.flow], ['Greedy, one at a time', 'Greedy', C.lime], ['Model A', 'Optimal (Model A, MILP = brute force)', C.amber]].map(([l, m, c]) => ({ label: l, v: seed3(m), color: c })))}
-      <p>Model A beats the best ranking by <b>${F.gain_rank}</b> points and greedy by <b>${F.gain_greedy}</b>.</p>` },
+      <p>Counted one by one, the top 3 by trips that start there add up to <b>${pct(outTop3().sum_of_singles)}</b>. Opened together they reach only <b>${pct(outTop3().coverage)}</b>, because they sit close together.</p>
+      <p>Model A beats the best ranking by <b>${F.gain_rank}</b> points and ${term('greedy', 'greedy')} by <b>${F.gain_greedy}</b>.</p>` },
   { t: 'The service radius decides the provinces', set() { setView({ hubs: DATA.models.A_3.slice(), radius: 150 }); later(1400, () => { S.radius = 125; recompute(); render(); }); },
     b: () => { const r = DATA.radius.filter(x => x.k === 3);
       return `<p>Our hubs were chosen at 150 km. The GPS data says that is about ${F.road_km} km by road, or ${F.hours} hours of driving.</p>
       <table><thead><tr><th>Radius</th><th class="n">Best set</th><th class="n">Our 3 hubs</th></tr></thead><tbody>${r.map(x => `<tr><td>${x.radius_km} km</td><td class="n">${pct(x.coverage)}</td><td class="n">${pct(x.A3_sites_coverage)}</td></tr>`).join('')}</tbody></table>
       <p>At every radius the best set keeps one hub in North, Central and Northeast, but the provinces change. The map now shows our hubs at 125 km. Set the radius in driving hours before signing a yard.</p>`; } },
   { t: 'Can trucks find a load back?', set() { setView({ hubs: DATA.models.A_3.slice(), radius: 150, laneView: true, nFlows: 200 }); },
-    b: () => `<p>A truck that delivers also needs a load home. Tan lines are trips with both ends near one of our hubs.</p>
+    b: () => `<p>A truck that delivers also needs a load home. Highlighted lines are trips with both ends near one of our hubs (${term('return loads', 'return')}).</p>
       <div class="big num">${F.lane_A3}</div><p>of trips have both ends within reach. The best possible set reaches ${F.lane_best}. We answered questions like this in a Neo4j graph database (see Findings → Return loads).</p>` },
   { t: 'Model B: serve every region', set() { setView({ hubs: DATA.models['B_3_0.5'].slice(), laneView: false, nFlows: 60 }); },
     b: () => { const a = Calc.groupCoverage(DATA.models.A_3, W, A, nodes.map(n => n.g)), b = Calc.groupCoverage(DATA.models['B_3_0.5'], W, A, nodes.map(n => n.g));
@@ -601,7 +634,7 @@ const camFor = k => ({ 2: ['Suphanburi', 'Lopburi'].map(byEn), 3: ['Chonburi', '
 function goStep(k) { cancel(); S.step = Math.max(0, Math.min(STEPS.length - 1, k)); STEPS[S.step].set(); render(); frame(camFor(S.step)); }
 
 // ---------------------------------------------------------------- findings tabs
-const FT = [['groups', 'Market groups'], ['shape', 'Network shape'], ['ranking', 'Set vs ranking'], ['sure', 'How sure are we'], ['lanes', 'Return loads + graph DB'], ['ab', 'Model A vs B'], ['method', 'Data and method']];
+const FT = [['faq', 'Common questions'], ['groups', 'Market groups'], ['shape', 'Network shape'], ['ranking', 'Set vs ranking'], ['sure', 'How sure are we'], ['lanes', 'Return loads + graph DB'], ['ab', 'Model A vs B'], ['method', 'Data and method']];
 function table(head, rows, num = []) {
   return `<div class="tablewrap"><table><thead><tr>${head.map((h, k) => `<th class="${num.includes(k) ? 'n' : ''}">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, k) => `<td class="${num.includes(k) ? 'n' : ''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
@@ -634,9 +667,24 @@ function findingsBody() {
   const k = S.ftab, el = document.getElementById('fbody');
   document.getElementById('ftabs').innerHTML = FT.map(([id, lab]) => `<button role="tab" data-ftab="${id}" aria-pressed="${k === id}">${lab}</button>`).join('');
   const groups = DATA.groups.map((g, i) => { const mem = nodes.filter(n => n.g === i); return [`<span class="dot" style="background:${GC[i]}"></span> ${g}`, mem.length, F[`g${i}_share`], mem.filter(n => n.conf < .8).length]; });
-  if (k === 'groups') {
+  if (k === 'faq') {
+    const ot = outTop3(), r125 = DATA.radius.find(r => r.k === 3 && r.radius_km === 125), ch = byEn('Chonburi');
+    const cas = DATA.stress['3_perturbation'].leave_one_out['drop_product_ผลิตภัณฑ์มันสำปะหลัง'][0].map(t => nodes.find(n => n.th === t).en).join(', ');
+    const q = (open, title, body) => `<details ${open ? 'open' : ''}><summary>${title}</summary><div>${body}</div></details>`;
+    el.innerHTML = `<div class="faq">
+      ${document.getElementById('tldr').hidden ? '<div class="row2"><button data-act="tldr">Show the 30-second summary</button></div>' : ''}
+      ${q(true, 'What is this study?', `<p>A new trucking company for farm and food goods can afford 2 or 3 hubs (yards with trucks and a sales team). We used open GPS data from trucks (OTP, January–April 2026): ${F.trips} trips between Thailand's 77 provinces for 7 goods. The question: which provinces should get the hubs so they can win the most loads?</p><p class="muted">Province totals only: no names, plates or companies.</p>`)}
+      ${q(false, 'What does "150 km" mean?', `<p>It is how far a hub sends empty trucks to <b>pick up</b> a load. Where the load goes after that does not matter: it can be delivered anywhere.</p><ul><li>Hub in Saraburi, cassava picked up in Lopburi, delivered to Chonburi: <b>counts</b>.</li><li>Sugar picked up in Khon Kaen, delivered to Saraburi: <b>does not count</b> for the Saraburi hub, because Khon Kaen is ${Math.round(DATA.dist[byEn('Khon Kaen')][byEn('Saraburi')])} km away. The Maha Sarakham hub, ${Math.round(DATA.dist[byEn('Khon Kaen')][byEn('Maha Sarakham')])} km from Khon Kaen, would take it.</li></ul><p>150 km is a straight line between province points; by road that is about ${F.road_km} km, or ${F.hours} hours of driving.</p>`)}
+      ${q(false, 'Why not just pick the 3 busiest provinces?', `<p>Two traps:</p><ul><li><b>Close hubs share customers.</b> The top 3 by ${term('trips that start there', 'outstrength')} add up to ${pct(ot.sum_of_singles)} when each is counted alone, but reach only ${pct(ot.coverage)} together.</li><li><b>Busy is not the same as useful.</b> Chonburi has the most trips, but they arrive: ${fmt0(Math.round(inT()[ch]))} end there and only ${fmt0(Math.round(outT()[ch]))} start there (ports). A pickup hub needs loads that start nearby.</li></ul><p>The best 3 provinces on their own are not the best team of 3.</p>`)}
+      ${q(false, 'What does the optimiser do?', `<p>It looks at whole sets of hubs instead of one province at a time. We tell it three things:</p>${table(['', 'In plain words'], [['Goal', 'Reach as many trips that start within 150 km as possible'], ['Choice', 'Open a hub in each province, or not'], ['Rules', 'Open 2 (or 3) hubs; count each province once, even if two hubs are near it']])}<p>To be sure, we also checked all 73,150 possible sets of 3 one by one: the same set comes out on top.</p>`)}
+      ${q(false, 'How sure are we?', `<p>The same hubs come back when we leave out any month, add random noise to every row (200 runs), count tons instead of trips, or use the 2025 data. Two things can change the answer:</p><ul><li><b>The service radius.</b> At 125 km our hubs reach ${pct(r125.A3_sites_coverage)}, while the best set for 125 km reaches ${pct(r125.coverage)}. Agree how many hours trucks will drive before signing a yard.</li><li><b>Cassava.</b> It is ${F.cassava_share}% of trips; without it the best hubs become ${cas}.</li></ul><p>If no yard can be found in Phitsanulok, Phichit is only ${F.near_gap} points lower.</p>`)}
+      ${q(false, 'Can trucks find a load home?', `<p>Yes. ${F.lane_A3} of trips start and end near one of our hubs (${term('return loads', 'return')}). The best any set could do is ${F.lane_best}, so trucks rarely have to drive home empty.</p>`)}
+      ${q(false, 'Why Model A and not Model B?', `<p><b>Model A</b> reaches the most trips: ${F.A3}. <b>Model B</b> adds a rule that every region gets at least half its trips within reach; it reaches ${F.B3} (${F.B_cost} points less) and only works with all 3 hubs. We recommend A, and keep B ready if a contract requires every region.</p>`)}
+      ${q(false, 'What does this not tell us?', `<p>It measures reach, not profit. Before investing, the company still needs real yards and roads, customers and competitors, costs and truck capacity.</p>`)}
+    </div>`;
+  } else if (k === 'groups') {
     el.innerHTML = `<div class="grid2"><div class="stack"><h3>The four groups</h3>${table(['Group', 'Provinces', 'Share of trips', 'Unstable'], groups, [1, 2, 3])}
-      <h3>The four checks from Chapter 9</h3>${table(['Check', 'Question', 'Result'], [
+      <h3>Four checks that the groups are real</h3>${table(['Check', 'Question', 'Result'], [
         ['1 Score', 'Best split over 100 runs', `4 groups, modularity ${DATA.obs_Q.toFixed(3)}`],
         ['2 Baseline', 'Could random wiring score this high?', `0 of ${fmt0(1000)} rewired copies reach it (p = ${F.c1000_p})`],
         ['2b Weight shuffle', 'Do link sizes add structure?', `No (p = ${F.p_shuffle}): groups come from who trades with whom`],
@@ -644,27 +692,27 @@ function findingsBody() {
         ['4 Size', 'Resolution 0.5 to 2', 'We act on resolution 1 (4 groups)'],
         ['Cross-check', 'Other algorithms', DATA.cross.filter(c => c.algorithm !== 'Louvain (reported)').map(c => `${c.algorithm}: ARI ${c.ARI_to_reported.toFixed(2)}`).join('; ')]])}</div>
       <div class="stack"><div id="h1"></div><div id="h2"></div>
-      ${what('The groups are real by the course test: random networks with the same number of partners per province never score as high. Shuffling only the link sizes does not lower the score, so the groups come from who trades with whom, not from how big each link is. Model A does not use the groups; only Model B does.', 'results/check2_baselines.csv, null_course.csv, null.csv, community_confidence.csv')}</div></div>
+      ${what('The groups are real by the standard test: random networks with the same number of partners per province never score as high. Shuffling only the link sizes does not lower the score, so the groups come from who trades with whom, not from how big each link is. Model A does not use the groups; only Model B does.', 'results/check2_baselines.csv, null_course.csv, null.csv, community_confidence.csv')}</div></div>
       <h3>Provinces that move between groups (confidence below 0.80)</h3>${table(['Province', 'Group', 'Confidence'], nodes.filter(n => n.conf < .8).sort((a, b) => a.conf - b.conf).map(n => [n.en, DATA.groups[n.g], n.conf.toFixed(2)]), [2])}
       <h3>Resolution sweep</h3>${table(['Resolution', 'Fewest groups', 'Most groups', 'Mean agreement (ARI)'], DATA.resolution.map(r => [r.resolution, r.min_groups, r.max_groups, r.mean_ARI_to_best.toFixed(2)]), [0, 1, 2, 3])}`;
-    hist('#h1', DATA.null_topo, DATA.obs_topo, 'Course test: rewired copies (unweighted Q)');
+    hist('#h1', DATA.null_topo, DATA.obs_topo, 'Rewired copies (unweighted Q)');
     hist('#h2', DATA.null_weight, DATA.obs_Q, 'Weight shuffle (weighted Q)');
   } else if (k === 'shape') {
     const fp = Object.fromEntries(DATA.fingerprint.map(r => [r.measure, r]));
     const row = (lab, key, d = 2) => [lab, (+fp[key]['freight network']).toFixed(d), fp[key]['random G(n,m), mean of 100'] == null ? '–' : (+fp[key]['random G(n,m), mean of 100']).toFixed(d)];
     const o = outT(), inn = inT(), top = arr => Calc.topK(arr, 5).map(i => nodes[i].en).join(', ');
-    el.innerHTML = `<div class="grid2"><div class="stack"><h3>Network fingerprint (Chapter 8)</h3>${table(['Measure', 'Freight network', 'Random network'], [
+    el.innerHTML = `<div class="grid2"><div class="stack"><h3>Network fingerprint</h3>${table(['Measure', 'Freight network', 'Random network'], [
         row('Pieces', 'pieces', 0), row('Density', 'density'), row('Clustering (partners trade with each other)', 'clustering'), row('Centralization (a few dominate)', 'centralization'),
         row('Average steps between provinces', 'avg_path'), row('Most steps between provinces', 'diameter', 0), row('Links inside groups (best split)', 'inside_share'),
         ['Trip share inside the 4 groups', (+fp['inside_share_weighted_reported_split']['freight network']).toFixed(2), '–']], [1, 2])}
       ${what('Neighbouring provinces trade with each other far more than chance (clustering well above random), and a few provinces trade with almost everyone. About two thirds of trips stay inside a group, so the groups overlap: they are regions, not walled markets.', 'results/structure_fingerprint.csv')}</div>
-      <div class="stack"><h3>Direction matters (Chapter 7)</h3>${table(['Question', 'Top 5 provinces'], [['Where do most trips start?', top(o)], ['Where do most trips end?', top(inn)], ['Most trips in + out', top(o.map((v, i) => v + inn[i]))], ['Most trading partners', Calc.topK(nodes.map(n => n.partners), 5).map(i => `${nodes[i].en} (${nodes[i].partners})`).join(', ')]])}
+      <div class="stack"><h3>Direction matters</h3>${table(['Question', 'Top 5 provinces'], [['Where do most trips start?', top(o)], ['Where do most trips end?', top(inn)], ['Most trips in + out', top(o.map((v, i) => v + inn[i]))], ['Most trading partners', Calc.topK(nodes.map(n => n.partners), 5).map(i => `${nodes[i].en} (${nodes[i].partners})`).join(', ')]])}
       ${what('A pickup hub should follow where trips start. Totals mix in the ports (Chonburi, Samut Prakan), where trips end. Betweenness here measures position between trading partners, not a road route, because each link is already a direct trip.', 'results/centrality_directed.csv (follows the goods filter in the planner)')}</div></div>`;
   } else if (k === 'ranking') {
     const rows = kk => DATA.seeding.filter(s => s.k === kk);
     el.innerHTML = `<div class="grid2">${[3, 2].map(kk => `<div class="stack"><h3>${kk} hubs: every method, same rule</h3>${barsHTML(rows(kk).map(s => ({ label: s.method.replace('Top by ', 'Top ' + kk + ' by ').replace('(origin trips)', '').replace('Optimal (Model A, MILP = brute force)', 'Model A (best set)'), v: s.coverage, color: s.method.startsWith('Optimal') ? C.amber : s.method === 'Greedy' ? C.lime : C.flow })))}</div>`).join('')}</div>
       ${table(['Method (3 hubs)', 'Hubs', 'Reached together', 'Sum when counted one by one'], rows(3).filter(s => s.hubs).map(s => [s.method, s.hubs, pct(s.coverage), s.sum_of_singles ? pct(s.sum_of_singles) : '–']), [2, 3])}
-      ${what(`Picking hubs is a seed-selection problem (Chapter 10): each hub "reaches" provinces within the radius. Rankings fail because high-ranked provinces sit near each other: counted one by one they add up to far more than they reach together. Greedy adds the best next hub each time and gets close; the optimiser compares whole sets and does ${F.gain_greedy} points better.`, 'results/seeding.csv')}`;
+      ${what(`Picking hubs is a coverage problem: each hub "reaches" provinces within the radius. Rankings fail because high-ranked provinces sit near each other: counted one by one they add up to far more than they reach together. Greedy adds the best next hub each time and gets close; the optimiser compares whole sets and does ${F.gain_greedy} points better.`, 'results/seeding.csv')}`;
   } else if (k === 'sure') {
     const st = DATA.stress, lo = st['3_perturbation'].leave_one_out;
     const TH = { 'มกราคม': 'January', 'กุมภาพันธ์': 'February', 'มีนาคม': 'March', 'เมษายน': 'April', 'ข้าวเปลือก': 'paddy', 'ข้าว': 'rice', 'น้ำตาลทราย': 'sugar',
@@ -680,7 +728,7 @@ function findingsBody() {
         ['Random noise ±20% on every row (200 runs)', `Same hubs ${st['3_perturbation'].noise_200_same_A3} of 200`],
         ['Bangkok point moved 20 km four ways', `Same hubs ${st['3_perturbation'].bangkok_shift_4_same_A3} of 4`],
         ['Full 2025 data at 150 km', `Our hubs are also the best set (${st['4_year_2025_all_months']['150'].best_cov.toFixed(1)}%)`],
-        ['1,000 rewired copies (Chapter 9)', `${st['2_check2_1000'].copies_at_or_above} reach our score`],
+        ['1,000 rewired copies', `${st['2_check2_1000'].copies_at_or_above} reach our score`],
         ['Newer library versions', `${st['5_library_versions'].identical} of ${st['5_library_versions'].result_tables_compared} result tables identical`]])}
       <h3>Leave one out</h3>${table(['Removed', 'Best 3 hubs', 'Reach', 'Hubs'], dropRows, [2])}</div></div>
       <div class="grid2"><div class="stack"><h3>Near-ties at 150 km</h3>${table(['Rank', 'Hubs (3)', 'Reach', 'Points behind'], DATA.near.filter(r => r.k === 3).map(r => [r.rank, r.hubs, pct(r.coverage), r.gap_pp.toFixed(2)]), [0, 2, 3])}</div>
@@ -708,11 +756,11 @@ function findingsBody() {
       <p>For each province we know how many trips start there. A province counts as reached if its centre is within the radius of any hub. The model picks <i>k</i> hubs to make the reached total as large as possible, counting each province once. This is the maximal covering location problem (Church and ReVelle, 1974), solved with SciPy's integer optimiser and checked against every possible set.</p>
       <div class="what"><div><b>Maximise</b> Σ trips<sub>i</sub> × reached<sub>i</sub></div><div><b>so that</b> reached<sub>i</sub> ≤ number of open hubs within the radius of i, and exactly k hubs are open</div></div>
       <h3>From raw data to the graph</h3>${table(['Year', 'Stage', 'Rows', 'Trips'], au.map(r => [r.year, r.stage.replace('_', ' '), fmt0(r.rows), fmt0(r.trips)]), [2, 3])}
-      <h3>Six graph decisions (Chapter 6)</h3>${table(['Decision', 'What we chose'], [['Schema', 'Province nodes; trip links; direction kept for reach'], ['Extraction', 'Structured GPS records; no text to extract'], ['Resolution', 'Province names trimmed and matched exactly to 77 points'], ['Weighting', 'Trips; tons and in-province trips tested: same hubs'], ['Pruning', 'No links removed'], ['Validation', `Hashes, totals, 2025 check, plausibility of every row (${F.flag_rows} rows flagged, ${F.flag_share}% of trips)`]])}</div>
-      <div class="stack"><h3>Data sources (Chapter 4)</h3>${table(['Source', 'Used for', 'Licence'], [['OTP otp_69_01 (2026, 2025)', 'trips, tons, road distance, duration', 'Open Data Common'], ['Province coordinates (DLA)', 'province points', 'CC-BY'], ['Factory locations (OPS)', 'Bangkok point only', 'Open Data Common']])}
-      <h3>What AI helped with, what the team decided</h3>${table(['Step', 'AI helped with', 'The team decided'], [['Data', 'cleaning and audit code', 'goods scope; sugarcane left out'], ['Groups', 'Louvain and random-copy code', "used the course's test and reported both tests"], ['Centrality', 'ranking code', 'caught a bridge-score error with an assertion; ranked by where trips start'], ['Hub model', 'optimiser code', '150 km, 2–3 hubs, group rule; Model A as main case'], ['Review', 'checked methods against the course', 'what to change; re-ran and stress-tested everything']])}
+      <h3>Six graph decisions</h3>${table(['Decision', 'What we chose'], [['Schema', 'Province nodes; trip links; direction kept for reach'], ['Extraction', 'Structured GPS records; no text to extract'], ['Resolution', 'Province names trimmed and matched exactly to 77 points'], ['Weighting', 'Trips; tons and in-province trips tested: same hubs'], ['Pruning', 'No links removed'], ['Validation', `Hashes, totals, 2025 check, plausibility of every row (${F.flag_rows} rows flagged, ${F.flag_share}% of trips)`]])}</div>
+      <div class="stack"><h3>Data sources</h3>${table(['Source', 'Used for', 'Licence'], [['OTP otp_69_01 (2026, 2025)', 'trips, tons, road distance, duration', 'Open Data Common'], ['Province coordinates (DLA)', 'province points', 'CC-BY'], ['Factory locations (OPS)', 'Bangkok point only', 'Open Data Common']])}
+      <h3>What AI helped with, what the team decided</h3>${table(['Step', 'AI helped with', 'The team decided'], [['Data', 'cleaning and audit code', 'goods scope; sugarcane left out'], ['Groups', 'Louvain and random-copy code', 'used the rewired-copy test and reported both tests'], ['Centrality', 'ranking code', 'caught a bridge-score error with an assertion; ranked by where trips start'], ['Hub model', 'optimiser code', '150 km, 2–3 hubs, group rule; Model A as main case'], ['Review', 'checked methods against standard practice', 'what to change; re-ran and stress-tested everything']])}
       <h3>Limits</h3><ul><li>Reach is not sales or profit: no cost, capacity or competitor data.</li><li>150 km is a straight line from a province point.</li><li>Monthly checks in 2026 look back at seen data; 2025 is the separate year.</li><li>Without cassava products the best hubs change.</li></ul>
-      <h3>Words used here</h3>${table(['Term', 'Meaning'], [['Reach', 'Share of trips that start within the radius of a hub'], ['Return loads', 'Trips whose start and end are both near a hub'], ['Market group', 'Provinces that trade more with each other than with others (community detection)'], ['Modularity (Q)', 'How much more trade stays inside groups than chance would give'], ['Greedy', 'Add the hub that helps most, one at a time, never undoing a pick']])}</div></div>`;
+      <h3>Words used here</h3>${table(['Term', 'Meaning'], Object.values(GLOSS))}</div></div>`;
   }
 }
 
@@ -743,6 +791,19 @@ function render() {
   findingsBody();
 }
 document.getElementById('modeStory').onclick = () => { S.mode = 'story'; goStep(S.step); };
+// 30-second summary strip: closable, remembered; Common questions can bring it back
+const tldr = document.getElementById('tldr');
+document.getElementById('tldrAnswer').innerHTML = `Open <b>Phitsanulok + Saraburi</b> first: ${F.A2} of trips start ${term('within reach', 'reach')}. Add <b>Maha Sarakham</b>: ${F.A3}, about ${F.per_month} trips a month.`;
+document.getElementById('tldrTrust').innerHTML = `We checked all 73,150 sets of 3. The same hubs come back with any month left out, 200 noisy runs and the 2025 data. Main risk: how far trucks will really drive.`;
+try { tldr.hidden = localStorage.getItem('explorerTldr') === 'closed'; } catch (e) {}
+const showTldr = on => { tldr.hidden = !on; try { localStorage.setItem('explorerTldr', on ? 'open' : 'closed'); } catch (e) {} findingsBody(); };
+document.getElementById('tldrClose').onclick = () => showTldr(false);
+document.getElementById('fbody').addEventListener('click', e => { if (e.target.closest('[data-act="tldr"]')) { showTldr(true); scrollTo({ top: 0, behavior: 'smooth' }); } });
+// Dotted-underline terms show their meaning in the shared tooltip box (hover, keyboard focus, or tap)
+const showTerm = el => { const g = GLOSS[el.dataset.g]; if (!g) return; const r = el.getBoundingClientRect();
+  tipEl.innerHTML = `<b>${g[0]}</b><br>${g[1]}`; tipEl.hidden = false; tipEl.style.left = Math.min(r.left, innerWidth - 270) + 'px'; tipEl.style.top = r.bottom + 6 + 'px'; };
+['mouseover', 'focusin', 'click'].forEach(ev => document.addEventListener(ev, e => { const t = e.target.closest?.('dfn.term'); if (t) showTerm(t); }));
+['mouseout', 'focusout'].forEach(ev => document.addEventListener(ev, e => { if (e.target.closest?.('dfn.term')) tipEl.hidden = true; }));
 document.getElementById('resetView').onclick = () => frame(S.mode === 'story' ? camFor(S.step) : null);
 document.getElementById('theme').onclick = () => {
   const t = document.documentElement.classList.contains('theme-freight') ? 'ocean' : 'freight';
