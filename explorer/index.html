@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script>  // apply the saved theme before first paint
+  try { const t = new URLSearchParams(location.hash.slice(1)).get('theme') || localStorage.getItem('explorerTheme'); if (t !== 'ocean') document.documentElement.classList.add('theme-freight'); } catch (e) { document.documentElement.classList.add('theme-freight'); }  // Freight is the default
+</script>
 <title>Freight Hub Explorer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -13,20 +16,29 @@
   --bg1: #071B2E; --bg2: #0B3B4F; --glass: rgba(255,255,255,.075); --glass-2: rgba(255,255,255,.045); --glass-hi: rgba(255,255,255,.14);
   --border: rgba(255,255,255,.15); --fg: #EAF6FF; --muted: #9DB7C9; --cyan: #37E2D5; --amber: #FFB547; --coral: #FF6B6B; --lime: #A3E635; --ink: #04202C;
   --display: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif; --body: 'Plus Jakarta Sans', 'Segoe UI', 'Helvetica Neue', sans-serif; --thai: 'Sarabun', 'Tahoma', sans-serif;
+  --accent2: #22A6C9; --glow1: #0F4C6B; --glow2: #123D73; --orb1: #1FB5C9; --orb2: #2350C8; --h1a: #FFFFFF; --h1b: #BFF6F1; --h1c: #FFE0A8;
+  --g0: #37E2D5; --g1: #FFB547; --g2: #A3E635; --g3: #B794F6; --flow: #7F9AAE; --dim: #4C6A80; --gold: #FFD166;
   color-scheme: dark;
 }
+/* Theme 2, "Thai freight": road charcoal, signal yellow accent, violet hubs opposite the yellow (no red: reads as a bad sign). Same variable names, so roles stay the same. */
+:root.theme-freight {
+  --bg1: #16181D; --bg2: #22252C; --fg: #F3EBDD; --muted: #B4AC9E; --cyan: #F5B700; --accent2: #E09A00; --amber: #B28CFF; --coral: #FF9F6B; --lime: #52B788; --ink: #16181D;
+  --glow1: #3A2F12; --glow2: #2A2E36; --orb1: #F5B700; --orb2: #4EA8DE; --h1a: #FFFFFF; --h1b: #F3EBDD; --h1c: #F5B700;
+  --g0: #F5B700; --g1: #4EA8DE; --g2: #52B788; --g3: #E07A9B; --flow: #9A9285; --dim: #5E5A52; --gold: #F5B700;
+}
 * { box-sizing: border-box; }
-html { background: radial-gradient(1100px 700px at 8% -8%, #0F4C6B 0%, transparent 60%), radial-gradient(900px 700px at 100% 100%, #123D73 0%, transparent 55%), linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 100%) fixed; color: var(--fg); }
+html, body { overflow-x: clip; }  /* 100vw header band must not add a sideways scrollbar */
+html { background: radial-gradient(1100px 700px at 8% -8%, var(--glow1) 0%, transparent 60%), radial-gradient(900px 700px at 100% 100%, var(--glow2) 0%, transparent 55%), linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 100%) fixed; color: var(--fg); }
 body { margin: 0; background: transparent; color: var(--fg); font: 15px/1.55 var(--body); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 40px; min-height: 100vh; }
 .orbs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
 .orbs i { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .32; animation: drift 40s ease-in-out infinite alternate; }
-.orbs i:nth-child(1) { width: 48vmax; height: 48vmax; background: #1FB5C9; top: -20vmax; left: -12vmax; }
-.orbs i:nth-child(2) { width: 52vmax; height: 52vmax; background: #2350C8; bottom: -26vmax; right: -14vmax; animation-duration: 52s; }
-.orbs i:nth-child(3) { width: 30vmax; height: 30vmax; background: #FFB547; top: 32%; left: 42%; opacity: .12; animation-duration: 60s; }
+.orbs i:nth-child(1) { width: 48vmax; height: 48vmax; background: var(--orb1); top: -20vmax; left: -12vmax; }
+.orbs i:nth-child(2) { width: 52vmax; height: 52vmax; background: var(--orb2); bottom: -26vmax; right: -14vmax; animation-duration: 52s; }
+.orbs i:nth-child(3) { width: 30vmax; height: 30vmax; background: var(--amber); top: 32%; left: 42%; opacity: .12; animation-duration: 60s; }
 @keyframes drift { to { transform: translate(9vmax, 7vmax) scale(1.12); } }
 .wrap { position: relative; z-index: 1; max-width: 1480px; margin: 0 auto; }
 h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(22px, 2.8vw, 34px); font-weight: 700; letter-spacing: -.02em; background: linear-gradient(90deg, #FFFFFF, #BFF6F1 60%, #FFE0A8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+h1 { font-size: clamp(22px, 2.8vw, 34px); font-weight: 700; letter-spacing: -.02em; background: linear-gradient(90deg, var(--h1a), var(--h1b) 60%, var(--h1c)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 h2 { font-size: 21px; font-weight: 700; letter-spacing: -.01em; }
 h3 { font-size: 15px; font-weight: 600; color: var(--cyan); }
 p { margin: 0; }
@@ -40,18 +52,18 @@ p { margin: 0; }
 .card { padding: 18px; min-width: 0; }
 button, select, input { font: inherit; color: inherit; }
 button { cursor: pointer; border: 1px solid var(--border); background: var(--glass-2); border-radius: 12px; padding: 7px 13px; transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s; }
-button:hover { transform: translateY(-1px); border-color: rgba(55,226,213,.6); box-shadow: 0 6px 20px rgba(55,226,213,.15); }
-button.primary { background: linear-gradient(135deg, #37E2D5, #22A6C9); color: var(--ink); border-color: transparent; font-weight: 700; box-shadow: 0 8px 24px rgba(55,226,213,.28); }
-button[aria-pressed="true"] { background: linear-gradient(135deg, rgba(55,226,213,.95), rgba(34,166,201,.95)); color: var(--ink); border-color: transparent; font-weight: 700; }
+button:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--cyan) 60%, transparent); box-shadow: 0 6px 20px color-mix(in srgb, var(--cyan) 15%, transparent); }
+button.primary { background: linear-gradient(135deg, var(--cyan), var(--accent2)); color: var(--ink); border-color: transparent; font-weight: 700; box-shadow: 0 8px 24px color-mix(in srgb, var(--cyan) 28%, transparent); }
+button[aria-pressed="true"] { background: linear-gradient(135deg, color-mix(in srgb, var(--cyan) 95%, transparent), color-mix(in srgb, var(--accent2) 95%, transparent)); color: var(--ink); border-color: transparent; font-weight: 700; }
 select { background: var(--glass-2); border: 1px solid var(--border); border-radius: 10px; padding: 5px 8px; }
-select option { background: #0B2A40; }
-:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; box-shadow: 0 0 0 5px rgba(55,226,213,.2); }
+select option { background: var(--bg1); }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; box-shadow: 0 0 0 5px color-mix(in srgb, var(--cyan) 20%, transparent); }
 .seg { display: inline-flex; padding: 3px; gap: 3px; border: 1px solid var(--border); border-radius: 13px; background: rgba(0,0,0,.18); }
 .seg button { border: 0; border-radius: 10px; background: transparent; padding: 6px 12px; }
 .seg button:hover { transform: none; box-shadow: none; background: var(--glass-hi); }
-.seg button[aria-pressed="true"] { background: linear-gradient(135deg, #37E2D5, #22A6C9); color: var(--ink); font-weight: 700; box-shadow: 0 4px 14px rgba(55,226,213,.3); }
+.seg button[aria-pressed="true"] { background: linear-gradient(135deg, var(--cyan), var(--accent2)); color: var(--ink); font-weight: 700; box-shadow: 0 4px 14px color-mix(in srgb, var(--cyan) 30%, transparent); }
 
-header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 12px max(16px, env(safe-area-inset-left, 0px)); background: rgba(7,27,46,.55); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; margin-inline: calc(50% - 50vw); padding: 14px max(16px, env(safe-area-inset-left, 0px)) 12px; background: color-mix(in srgb, var(--bg1) 55%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg1); }
 .top .row { max-width: 1480px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; }
 .top .titles { display: grid; gap: 5px; min-width: 0; }
@@ -65,7 +77,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .mapcard { padding: 12px; display: grid; gap: 10px; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 13px; }
 .toolbar label { display: inline-flex; gap: 6px; align-items: center; }
-.stage { position: relative; border-radius: 16px; overflow: hidden; background: radial-gradient(70% 60% at 50% 40%, rgba(55,226,213,.08), transparent 70%), rgba(2,14,26,.45); border: 1px solid rgba(255,255,255,.08); }
+.stage { position: relative; border-radius: 16px; overflow: hidden; background: radial-gradient(70% 60% at 50% 40%, color-mix(in srgb, var(--cyan) 8%, transparent), transparent 70%), color-mix(in srgb, var(--bg1) 45%, transparent); border: 1px solid rgba(255,255,255,.08); }
 #flowcv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 #map { position: relative; z-index: 1; width: 100%; height: min(calc(100vh - 300px), 820px); min-height: 420px; display: block; touch-action: none; }
 @media (min-width: 1001px) { aside.panel { position: sticky; top: 130px; max-height: calc(100vh - 150px); overflow-y: auto; overscroll-behavior: contain; } }
@@ -81,7 +93,7 @@ details.settings > summary { cursor: pointer; }
   .mapopts > summary { display: list-item; font-size: 13px; color: var(--muted); padding: 2px 0 6px; }
   #map { height: 60vh; min-height: 320px; }
   #sizekey { display: none; }
-  .story .stepnav { position: fixed; right: 12px; bottom: max(12px, env(safe-area-inset-bottom, 0px)); z-index: 8; padding: 6px 6px 6px 14px; border-radius: 16px; background: rgba(7,27,46,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); }
+  .story .stepnav { position: fixed; right: 12px; bottom: max(12px, env(safe-area-inset-bottom, 0px)); z-index: 8; padding: 6px 6px 6px 14px; border-radius: 16px; background: color-mix(in srgb, var(--bg1) 85%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); }
   body { padding-bottom: 80px; }
 }
 .sizekey { position: absolute; left: 12px; bottom: 12px; z-index: 2; padding: 10px 12px; border-radius: 14px; font-size: 11.5px; color: var(--muted); max-width: 230px; display: grid; gap: 6px; }
@@ -93,12 +105,12 @@ aside.panel { display: grid; gap: 14px; align-content: start; }
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .metric { background: var(--glass-2); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 11px 13px; }
-.metric b { display: block; font: 700 25px/1.1 var(--display); color: var(--amber); text-shadow: 0 0 24px rgba(255,181,71,.25); }
+.metric b { display: block; font: 700 25px/1.1 var(--display); color: var(--amber); text-shadow: 0 0 24px color-mix(in srgb, var(--amber) 25%, transparent); }
 .metric span { font-size: 12px; color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { display: inline-flex; gap: 6px; align-items: center; padding: 3px 4px 3px 11px; border-radius: 999px; background: var(--glass-2); border: 1px solid var(--border); font-size: 13px; animation: pop .35s ease-out; }
 .chip button { padding: 0 7px; border: 0; background: transparent; color: var(--muted); }
-.chip.hub { border-color: rgba(255,181,71,.7); box-shadow: 0 0 16px rgba(255,181,71,.18); }
+.chip.hub { border-color: color-mix(in srgb, var(--amber) 70%, transparent); box-shadow: 0 0 16px color-mix(in srgb, var(--amber) 18%, transparent); }
 @keyframes pop { from { transform: scale(.8); opacity: 0; } }
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .row2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -128,7 +140,7 @@ input[type=checkbox] { accent-color: var(--cyan); }
 .story h2 { animation: rise .45s cubic-bezier(.2,.8,.2,1); }
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
 .story .body p { max-width: 62ch; }
-.story .big { font: 700 38px/1.05 var(--display); color: var(--amber); text-shadow: 0 0 30px rgba(255,181,71,.35); }
+.story .big { font: 700 38px/1.05 var(--display); color: var(--amber); text-shadow: 0 0 30px color-mix(in srgb, var(--amber) 35%, transparent); }
 .story ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 
 section.findings { margin-top: 20px; display: grid; gap: 14px; scroll-margin-top: 120px; }
@@ -137,16 +149,16 @@ section.findings { margin-top: 20px; display: grid; gap: 14px; scroll-margin-top
 .tablewrap { overflow-x: auto; border-radius: 12px; }
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; }
-tbody tr:hover { background: rgba(55,226,213,.06); }
+tbody tr:hover { background: color-mix(in srgb, var(--cyan) 6%, transparent); }
 th { color: var(--cyan); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; }
 td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
-.what { background: linear-gradient(135deg, rgba(55,226,213,.09), rgba(255,181,71,.06)); border: 1px solid rgba(55,226,213,.25); border-radius: 14px; padding: 12px 14px; display: grid; gap: 6px; }
+.what { background: linear-gradient(135deg, color-mix(in srgb, var(--cyan) 9%, transparent), color-mix(in srgb, var(--amber) 6%, transparent)); border: 1px solid color-mix(in srgb, var(--cyan) 25%, transparent); border-radius: 14px; padding: 12px 14px; display: grid; gap: 6px; }
 .what b { color: var(--cyan); }
 svg text { fill: var(--muted); font: 12px var(--body); }
-svg .lbl { fill: var(--fg); font: 600 12px var(--body); paint-order: stroke; stroke: rgba(4,20,34,.9); stroke-width: 3.5px; }
+svg .lbl { fill: var(--fg); font: 600 12px var(--body); paint-order: stroke; stroke: color-mix(in srgb, var(--bg1) 90%, transparent); stroke-width: 3.5px; }
 circle.hub { animation: pulse 2.4s ease-in-out infinite; }
 @keyframes pulse { 50% { stroke-width: 8px; stroke-opacity: .45; } }
-#tip { position: fixed; pointer-events: none; background: rgba(8,30,48,.78); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 12px; padding: 9px 11px; font-size: 12.5px; z-index: 20; max-width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+#tip { position: fixed; pointer-events: none; background: color-mix(in srgb, var(--bg1) 78%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 12px; padding: 9px 11px; font-size: 12.5px; z-index: 20; max-width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 footer { margin-top: 22px; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
 footer a { color: var(--cyan); }
 @media (prefers-reduced-motion: reduce) { *, *::before { transition: none !important; animation: none !important; } }
@@ -171,6 +183,7 @@ footer a { color: var(--cyan); }
       <button id="autoplay" aria-pressed="false" title="Advance the story every 12 seconds">▶ Autoplay</button>
       <button id="fs" title="Full screen">⛶</button>
       <button id="lang" aria-pressed="false" title="Show province names in Thai">ไทย</button>
+      <button id="theme" title="Switch colour theme">🎨 Theme</button>
       <div class="seg" role="group" aria-label="Mode">
         <button id="modeStory" aria-pressed="true">Story</button>
         <button id="modeExplore" aria-pressed="false">Explore</button>
@@ -305,7 +318,10 @@ const DATA = {"nodes":[{"en":"Krabi","th":"กระบี่","lat":8.0579,"lng
 <script>
 (() => {
 const N = DATA.nodes.length, nodes = DATA.nodes, P = DATA.products;
-const GC = ['#37E2D5', '#FFB547', '#A3E635', '#B794F6'];  // market group colours tuned for the dark glass
+// Palette comes from the CSS variables of the active theme (read once; switching theme reloads the page).
+const CSSV = getComputedStyle(document.documentElement), C = Object.fromEntries(['cyan', 'amber', 'lime', 'coral', 'gold', 'fg', 'muted', 'flow', 'dim', 'orb2', 'bg1', 'g0', 'g1', 'g2', 'g3'].map(k => [k, CSSV.getPropertyValue('--' + k).trim()]));
+const tint = (c, op) => { const x = d3.color(c); x.opacity = op; return x.formatRgb(); };
+const GC = [C.g0, C.g1, C.g2, C.g3];  // market group colours
 const fmt0 = d3.format(','), pct = v => v.toFixed(1) + '%', pct0 = v => Math.round(v) + '%';
 const byEn = en => nodes.findIndex(n => n.en === en);
 const road = DATA.road, minPerKm = road.minutes_median_pairs_130_170km / 150;
@@ -328,7 +344,7 @@ svg.attr('viewBox', `0 0 ${VW} ${VH}`);
 const root = svg.append('g'), gLand = root.append('g'), gHull = root.append('g').attr('filter', 'url(#soft)'), gRings = root.append('g'), gFlows = root.append('g'), gNodes = root.append('g'), gLabels = root.append('g');
 svg.append('defs').append('filter').attr('id', 'soft').attr('x', '-30%').attr('y', '-30%').attr('width', '160%').attr('height', '160%').append('feGaussianBlur').attr('stdDeviation', 16);
 svg.select('defs').append('marker').attr('id', 'arw').attr('viewBox', '0 -4 8 8').attr('refX', 7).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
-  .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#37E2D5');
+  .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', C.cyan);
 let zt = d3.zoomIdentity;
 // plain wheel scrolls the page; Ctrl/⌘ + wheel (and trackpad pinch, which arrives as ctrl+wheel) zooms
 const zoomer = d3.zoom().scaleExtent([.7, 6]).filter(e => (e.type === 'wheel' ? e.ctrlKey || e.metaKey : !e.button))
@@ -341,15 +357,15 @@ const proj = d3.geoMercator().fitExtent([[24, 18], [VW - 24, VH - 18]], THAI);
 const geoPath = d3.geoPath(proj);
 // country silhouette (real borders, Natural Earth); neighbours faint for context
 const landGrad = svg.select('defs').append('linearGradient').attr('id', 'land').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', 1);
-landGrad.append('stop').attr('offset', 0).attr('stop-color', '#37E2D5').attr('stop-opacity', .13);
-landGrad.append('stop').attr('offset', 1).attr('stop-color', '#2350C8').attr('stop-opacity', .08);
+landGrad.append('stop').attr('offset', 0).attr('stop-color', C.cyan).attr('stop-opacity', .13);
+landGrad.append('stop').attr('offset', 1).attr('stop-color', C.orb2).attr('stop-opacity', .08);
 gLand.selectAll('path.nb').data(DATA.outline.features.filter(f => f !== THAI)).join('path').attr('class', 'nb').attr('d', geoPath)
-  .attr('fill', 'rgba(255,255,255,.025)').attr('stroke', 'rgba(157,183,201,.22)').attr('stroke-width', .7);
-gLand.append('path').datum(THAI).attr('d', geoPath).attr('fill', 'rgba(55,226,213,.10)').attr('filter', 'url(#soft)');
-gLand.append('path').datum(THAI).attr('d', geoPath).attr('fill', 'url(#land)').attr('stroke', 'rgba(55,226,213,.55)').attr('stroke-width', 1.2).attr('stroke-linejoin', 'round');
+  .attr('fill', 'rgba(255,255,255,.025)').attr('stroke', tint(C.muted, .22)).attr('stroke-width', .7);
+gLand.append('path').datum(THAI).attr('d', geoPath).attr('fill', tint(C.cyan, .10)).attr('filter', 'url(#soft)');
+gLand.append('path').datum(THAI).attr('d', geoPath).attr('fill', 'url(#land)').attr('stroke', tint(C.cyan, .55)).attr('stroke-width', 1.2).attr('stroke-linejoin', 'round');
 const place = [['MYANMAR', 97.6, 18.9], ['LAOS', 103.4, 19.3], ['CAMBODIA', 104.6, 12.9], ['MALAYSIA', 101.9, 5.9], ['VIETNAM', 106.2, 15.9], ['Andaman Sea', 97.4, 9.6], ['Gulf of Thailand', 101.2, 10.6]];
 gLand.selectAll('text.place').data(place).join('text').attr('class', 'place').attr('x', d => proj([d[1], d[2]])[0]).attr('y', d => proj([d[1], d[2]])[1])
-  .attr('text-anchor', 'middle').attr('fill', 'rgba(157,183,201,.42)').style('font', d => (d[0] === d[0].toUpperCase() ? '600 11px var(--body)' : 'italic 11px var(--body)')).style('letter-spacing', d => (d[0] === d[0].toUpperCase() ? '.22em' : '0')).text(d => d[0]);
+  .attr('text-anchor', 'middle').attr('fill', tint(C.muted, .42)).style('font', d => (d[0] === d[0].toUpperCase() ? '600 11px var(--body)' : 'italic 11px var(--body)')).style('letter-spacing', d => (d[0] === d[0].toUpperCase() ? '.22em' : '0')).text(d => d[0]);
 const trueGeo = nodes.map(n => proj([n.lng, n.lat]));
 // nudge circles apart a little in the crowded central plain; each stays close to its true spot
 const geoPos = (() => {
@@ -383,7 +399,7 @@ function frame(ids) {
   const k = Math.max(.7, Math.min(1.8, VW / (xs[1] - xs[0] + 2 * pad), VH / (ys[1] - ys[0] + 2 * pad))), cx = (xs[0] + xs[1]) / 2, cy = (ys[0] + ys[1]) / 2;
   svg.transition().duration(600).call(zoomer.transform, d3.zoomIdentity.translate(VW / 2 - k * cx, VH / 2 - k * cy).scale(k));
 }
-const confColor = d3.scaleLinear([0.35, 0.8, 1], ['#FF6B6B', '#FFD166', '#A3E635']).clamp(true);
+const confColor = d3.scaleLinear([0.35, 0.8, 1], [C.coral, C.gold, C.lime]).clamp(true);
 
 function drawMap() {
   const p = pos(), cov = S.hubs.length ? Calc.covered(S.hubs, A) : null;
@@ -397,7 +413,7 @@ function drawMap() {
   };
   const rings = S.layout === 'geo' ? [...S.hubs.map(h => ring(h, false)), ...(S.mode === 'explore' && S.pin ? S.pin.map(h => ring(h, true)) : [])] : [];
   gRings.selectAll('ellipse').data(rings, d => d.key).join(en => en.append('ellipse').attr('cx', d => d.cx).attr('cy', d => d.cy).attr('rx', 0).attr('ry', 0))
-    .attr('fill', d => (d.pin ? 'none' : 'rgba(255,181,71,.12)')).attr('stroke', d => (d.pin ? '#EAF6FF' : '#FFB547')).attr('stroke-width', d => (d.pin ? 1.5 : 2.5)).attr('stroke-dasharray', d => (d.pin ? '6 5' : null))
+    .attr('fill', d => (d.pin ? 'none' : tint(C.amber, .12))).attr('stroke', d => (d.pin ? C.fg : C.amber)).attr('stroke-width', d => (d.pin ? 1.5 : 2.5)).attr('stroke-dasharray', d => (d.pin ? '6 5' : null))
     .transition().duration(800).ease(d3.easeCubicOut).attr('cx', d => d.cx).attr('cy', d => d.cy).attr('rx', d => d.rx).attr('ry', d => d.ry);
   // flows
   let fl = [];
@@ -408,7 +424,7 @@ function drawMap() {
   const laneOn = S.laneView && cov;
   gFlows.selectAll('path').data(fl, d => d.i + '-' + d.j + (S.arrows ? 'd' : 'u')).join('path').attr('fill', 'none')
     .attr('marker-end', S.arrows ? 'url(#arw)' : null)
-    .attr('stroke', d => laneOn ? (cov[d.i] && cov[d.j] ? '#37E2D5' : '#4C6A80') : '#7F9AAE')
+    .attr('stroke', d => laneOn ? (cov[d.i] && cov[d.j] ? C.cyan : C.dim) : C.flow)
     .attr('stroke-opacity', d => laneOn ? (cov[d.i] && cov[d.j] ? .8 : .18) : .35)
     .attr('stroke-width', d => fw(d.v))
     .attr('d', d => {
@@ -424,7 +440,7 @@ function drawMap() {
       .on('mousemove', (e, i) => tip(e, i)).on('mouseenter', (e, i) => { S.hover = i; applyHover(); }).on('mouseleave', () => { tipEl.hidden = true; S.hover = null; applyHover(); }).on('click', (e, i) => { if (e.pointerType === 'touch') tip(e, i); clickNode(i); })
       .attr('tabindex', 0).attr('role', 'button').attr('aria-label', i => nodes[i].en).on('keydown', (e, i) => { if (e.key === 'Enter') clickNode(i); }))
     .attr('fill', i => (S.colorBy === 'g' ? GC[nodes[i].g] : confColor(nodes[i].conf)))
-    .attr('stroke', i => (S.hubs.includes(i) ? '#FFB547' : i === S.sel ? '#37E2D5' : 'rgba(4,20,34,.9)')).attr('stroke-width', i => (S.hubs.includes(i) || i === S.sel ? 3 : 1))
+    .attr('stroke', i => (S.hubs.includes(i) ? C.amber : i === S.sel ? C.cyan : tint(C.bg1, .9))).attr('stroke-width', i => (S.hubs.includes(i) || i === S.sel ? 3 : 1))
     .attr('class', i => (S.hubs.includes(i) ? 'hub' : null)).style('cursor', 'pointer')
     .transition().duration(500).attr('cx', i => p[i][0]).attr('cy', i => p[i][1]).attr('r', i => r(size[i])).attr('opacity', fade);
   // labels: hubs, selection, story focus, plus the 10 biggest circles so the map can be read without hovering
@@ -463,7 +479,7 @@ function tick(t) {
       const a = p[q.f.i], b = p[q.f.j], u = (t * q.sp + q.ph) % 1;
       const x = ox + s * (zt.k * (a[0] + (b[0] - a[0]) * u) + zt.x), y = oy + s * (zt.k * (a[1] + (b[1] - a[1]) * u) + zt.y);
       let alpha = Math.sin(Math.PI * u) * (.35 + .6 * q.k), col = GC[nodes[q.f.i].g];
-      if (PCOV) { if (PCOV[q.f.i] && PCOV[q.f.j]) col = '#37E2D5'; else alpha *= .12; }
+      if (PCOV) { if (PCOV[q.f.i] && PCOV[q.f.j]) col = C.cyan; else alpha *= .12; }
       if (S.hover != null && q.f.i !== S.hover && q.f.j !== S.hover) alpha *= .08;
       ctx.globalAlpha = alpha * .25; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, 5.5 * Math.min(1.6, zt.k * s + .2), 0, 7); ctx.fill();
       ctx.globalAlpha = alpha; ctx.beginPath(); ctx.arc(x, y, 1.9 * Math.min(1.6, zt.k * s + .2), 0, 7); ctx.fill();
@@ -477,20 +493,20 @@ function applyHover() {
   const hv = S.hover;
   const near = hv == null ? null : new Set(nodes.map((_, j) => j).filter(j => j === hv || T[hv][j] > 0 || T[j][hv] > 0));
   gNodes.selectAll('circle').style('opacity', i => (near ? (near.has(i) ? 1 : .12) : null));
-  gFlows.selectAll('path').style('opacity', d => (hv == null ? null : d.i === hv || d.j === hv ? 1 : .05)).style('stroke', d => (hv != null && (d.i === hv || d.j === hv) ? '#37E2D5' : null));
+  gFlows.selectAll('path').style('opacity', d => (hv == null ? null : d.i === hv || d.j === hv ? 1 : .05)).style('stroke', d => (hv != null && (d.i === hv || d.j === hv) ? C.cyan : null));
 }
 function sizeKey() {
   const el = document.getElementById('sizekey'); if (!SIZE || !el) return;
   const svgEl = svg.node(), s = Math.min(svgEl.clientWidth / VW, svgEl.clientHeight / VH) * zt.k, mx = d3.max(SIZE.size);
   const vals = [mx, mx / 3, mx / 10].map(v => Math.max(1000, Math.round(v / 1000) * 1000)), rr = vals.map(v => SIZE.r(v) * s), H = 2 * rr[0] + 6;
-  el.innerHTML = `<div class="label">What circle size means</div><svg width="${2 * rr[0] + 70}" height="${H}">${vals.map((v, k) => `<circle cx="${rr[0] + 2}" cy="${H - rr[k] - 2}" r="${rr[k]}" fill="none" stroke="#9DB7C9" stroke-dasharray="${k ? '3 3' : ''}"/><text x="${2 * rr[0] + 10}" y="${H - 2 * rr[k] + 8}">${d3.format('.2~s')(v).replace('k', 'k')}</text>`).join('')}</svg><div>Area = ${SIZE.label}, Jan–Apr 2026. 4× the trips = 2× the width.</div>`;
+  el.innerHTML = `<div class="label">What circle size means</div><svg width="${2 * rr[0] + 70}" height="${H}">${vals.map((v, k) => `<circle cx="${rr[0] + 2}" cy="${H - rr[k] - 2}" r="${rr[k]}" fill="none" stroke="${C.muted}" stroke-dasharray="${k ? '3 3' : ''}"/><text x="${2 * rr[0] + 10}" y="${H - 2 * rr[k] + 8}">${d3.format('.2~s')(v).replace('k', 'k')}</text>`).join('')}</svg><div>Area = ${SIZE.label}, Jan–Apr 2026. 4× the trips = 2× the width.</div>`;
 }
 function legend() {
   const el = document.getElementById('legend');
   el.innerHTML = (S.colorBy === 'g' ? DATA.groups.map((g, k) => `<span><i style="background:${GC[k]}"></i>${g}</span>`).join('')
-    : `<span><i style="background:#A3E635"></i>Stable (≥ 0.80)</span><span><i style="background:#FFD166"></i>Moves sometimes</span><span><i style="background:#FF6B6B;color:#FF6B6B"></i>Moves often</span>`)
+    : `<span><i style="background:${C.lime}"></i>Stable (≥ 0.80)</span><span><i style="background:${C.gold}"></i>Moves sometimes</span><span><i style="background:${C.coral};color:${C.coral}"></i>Moves often</span>`)
     + `<span>Circle size: ${document.getElementById('sizeBy').selectedOptions[0].text.toLowerCase()}</span>`
-    + (S.hubs.length ? `<span>Amber ring = ${S.radius} km reach; faded = out of reach</span>` + (S.mode === 'explore' && S.pin ? '<span>Dashed ring = pinned set A</span>' : '') : '')
+    + (S.hubs.length ? `<span>Solid ring = ${S.radius} km reach; faded = out of reach</span>` + (S.mode === 'explore' && S.pin ? '<span>Dashed ring = pinned set A</span>' : '') : '')
     + '<span>Ctrl/⌘ + scroll or pinch to zoom; drag to pan</span>'
     + (S.layout === 'net' ? '<span>Network view: provinces that trade more sit closer; distance on screen is not km</span>' : '');
 }
@@ -509,7 +525,7 @@ function toggleHub(i) { S.hubs = S.hubs.includes(i) ? S.hubs.filter(h => h !== i
 
 // ---------------------------------------------------------------- shared pieces
 function barsHTML(rows, max = 100, mark = null, fmt = pct) {
-  return `<div class="bars">${rows.map(r => `<div class="bar"><span>${r.label}</span><span class="track"><span class="fill" style="width:${Math.max(0, Math.min(100, 100 * r.v / max))}%;background:${r.color || '#37E2D5'}"></span>${mark != null ? `<span class="mark" style="left:${100 * mark / max}%"></span>` : ''}</span><span class="num" style="text-align:right">${fmt(r.v)}</span></div>`).join('')}</div>`;
+  return `<div class="bars">${rows.map(r => `<div class="bar"><span>${r.label}</span><span class="track"><span class="fill" style="width:${Math.max(0, Math.min(100, 100 * r.v / max))}%;background:${r.color || C.cyan}"></span>${mark != null ? `<span class="mark" style="left:${100 * mark / max}%"></span>` : ''}</span><span class="num" style="text-align:right">${fmt(r.v)}</span></div>`).join('')}</div>`;
 }
 function liveMetrics(h = S.hubs) {
   const tot = W.reduce((a, b) => a + b, 0);
@@ -579,7 +595,7 @@ function provinceHTML() {
       <div class="metric"><b class="num">${n.partners}</b><span>provinces it trades with (of 76)</span></div>
     </div>
     <div><div class="label" style="margin-bottom:6px">Where its loads go</div>${barsHTML(dests.map(d => ({ label: nm(d.j), v: d.v })), mx, null, v => fmt0(Math.round(v)))}</div>
-    <div><div class="label" style="margin-bottom:6px">Where its arrivals come from</div>${barsHTML(origs.map(d => ({ label: nm(d.j), v: d.v, color: '#7F9AAE' })), mx, null, v => fmt0(Math.round(v)))}</div>
+    <div><div class="label" style="margin-bottom:6px">Where its arrivals come from</div>${barsHTML(origs.map(d => ({ label: nm(d.j), v: d.v, color: C.flow })), mx, null, v => fmt0(Math.round(v)))}</div>
     <div class="note">PageRank rank ${rank(nodes.map(x => x.pr))} (receives from provinces that receive a lot) · betweenness rank ${rank(nodes.map(x => x.btw))} (sits between trading partners; not a road route)</div>
     <div class="note">${S.hubs.length ? (near.length ? `Within ${S.radius} km of: ${near.map(nm).join(', ')}` : `Not within ${S.radius} km of any hub`) : 'Add hubs in the planner to see if it is within reach.'}</div>
     <div class="row2"><button class="primary" data-addhub="${i}">${S.hubs.includes(i) ? 'Remove hub here' : 'Make this a hub'}</button></div>
@@ -623,7 +639,7 @@ const STEPS = [
       <p>One hub lands in each of North, Central and Northeast, without the model being told to.</p>` },
   { t: 'Better than any ranking', set() { setView({ hubs: Calc.topK(nodes.map((_, i) => outT()[i] + inT()[i]), 3), nFlows: 40 }); later(2200, () => { S.hubs = DATA.models.A_3.slice(); render(); }); },
     b: () => `<p>Same budget, same 150 km rule, different ways to pick 3 hubs. The map first shows the top 3 by total trips, then Model A.</p>
-      ${barsHTML([['Random set (average)', 'Random (mean of all sets)', '#4C6A80'], ['Top 3 by all trips', 'Top by strength (in+out)', '#7F9AAE'], ['Top 3 by trips that start there', 'Top by out-strength (origin trips)', '#7F9AAE'], ['Greedy, one at a time', 'Greedy', '#A3E635'], ['Model A', 'Optimal (Model A, MILP = brute force)', '#FFB547']].map(([l, m, c]) => ({ label: l, v: seed3(m), color: c })))}
+      ${barsHTML([['Random set (average)', 'Random (mean of all sets)', C.dim], ['Top 3 by all trips', 'Top by strength (in+out)', C.flow], ['Top 3 by trips that start there', 'Top by out-strength (origin trips)', C.flow], ['Greedy, one at a time', 'Greedy', C.lime], ['Model A', 'Optimal (Model A, MILP = brute force)', C.amber]].map(([l, m, c]) => ({ label: l, v: seed3(m), color: c })))}
       <p>Model A beats the best ranking by <b>${F.gain_rank}</b> points and greedy by <b>${F.gain_greedy}</b>.</p>` },
   { t: 'The service radius decides the provinces', set() { setView({ hubs: DATA.models.A_3.slice(), radius: 150 }); later(1400, () => { S.radius = 125; recompute(); render(); }); },
     b: () => { const r = DATA.radius.filter(x => x.k === 3);
@@ -674,19 +690,19 @@ function hist(el, vals, obs, title) {
   const bins = d3.bin().domain(x.domain()).thresholds(24)(vals), y = d3.scaleLinear([0, d3.max(bins, b => b.length)], [h - m.b, m.t]);
   const s = d3.select(el).append('svg').attr('viewBox', `0 0 ${w} ${h}`).attr('width', '100%');
   s.append('text').attr('x', m.l).attr('y', 14).attr('class', 'lbl').text(title);
-  s.append('g').selectAll('rect').data(bins).join('rect').attr('x', b => x(b.x0) + 1).attr('width', b => Math.max(0, x(b.x1) - x(b.x0) - 2)).attr('y', b => y(b.length)).attr('height', b => y(0) - y(b.length)).attr('fill', '#7F9AAE');
-  s.append('line').attr('x1', x(obs)).attr('x2', x(obs)).attr('y1', m.t).attr('y2', h - m.b).attr('stroke', '#FFB547').attr('stroke-width', 2.5);
+  s.append('g').selectAll('rect').data(bins).join('rect').attr('x', b => x(b.x0) + 1).attr('width', b => Math.max(0, x(b.x1) - x(b.x0) - 2)).attr('y', b => y(b.length)).attr('height', b => y(0) - y(b.length)).attr('fill', C.flow);
+  s.append('line').attr('x1', x(obs)).attr('x2', x(obs)).attr('y1', m.t).attr('y2', h - m.b).attr('stroke', C.amber).attr('stroke-width', 2.5);
   const right = x(obs) > (m.l + w - m.r) / 2;
   s.append('text').attr('x', x(obs) + (right ? -6 : 6)).attr('y', m.t + 14).attr('text-anchor', right ? 'end' : 'start').attr('class', 'lbl').text(`ours ${obs.toFixed(3)}`);
-  s.append('g').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(5)).call(g => g.selectAll('line,path').attr('stroke', '#4C6A80'));
+  s.append('g').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(5)).call(g => g.selectAll('line,path').attr('stroke', C.dim));
 }
 function lineChart(el, rows) {
   const w = 520, h = 260, m = { l: 40, r: 34, t: 16, b: 36 };
   const x = d3.scalePoint(rows.map(r => r.radius_km), [m.l, w - m.r]), y = d3.scaleLinear([30, 100], [h - m.b, m.t]);
   const s = d3.select(el).append('svg').attr('viewBox', `0 0 ${w} ${h}`).attr('width', '100%');
-  s.append('g').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickFormat(d => d + ' km')).call(g => g.selectAll('line,path').attr('stroke', '#4C6A80'));
-  s.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => d + '%')).call(g => g.selectAll('line,path').attr('stroke', '#4C6A80'));
-  [['coverage', '#37E2D5', 'Best 3 hubs for that radius'], ['A3_sites_coverage', '#FFB547', 'Our 3 hubs (chosen at 150 km)']].forEach(([k, c, lab], q) => {
+  s.append('g').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickFormat(d => d + ' km')).call(g => g.selectAll('line,path').attr('stroke', C.dim));
+  s.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => d + '%')).call(g => g.selectAll('line,path').attr('stroke', C.dim));
+  [['coverage', C.cyan, 'Best 3 hubs for that radius'], ['A3_sites_coverage', C.amber, 'Our 3 hubs (chosen at 150 km)']].forEach(([k, c, lab], q) => {
     s.append('path').datum(rows).attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2.5).attr('stroke-dasharray', q ? '6 4' : null).attr('d', d3.line(r => x(r.radius_km), r => y(r[k])));
     s.selectAll(null).data(rows).join('circle').attr('cx', r => x(r.radius_km)).attr('cy', r => y(r[k])).attr('r', 4).attr('fill', c);
     s.append('text').attr('x', w - m.r).attr('y', h - m.b - 12 - 16 * q).attr('text-anchor', 'end').attr('class', 'lbl').style('fill', c).text(lab);
@@ -724,7 +740,7 @@ function findingsBody() {
       ${what('A pickup hub should follow where trips start. Totals mix in the ports (Chonburi, Samut Prakan), where trips end. Betweenness here measures position between trading partners, not a road route, because each link is already a direct trip.', 'results/centrality_directed.csv (follows the goods filter in the planner)')}</div></div>`;
   } else if (k === 'ranking') {
     const rows = kk => DATA.seeding.filter(s => s.k === kk);
-    el.innerHTML = `<div class="grid2">${[3, 2].map(kk => `<div class="stack"><h3>${kk} hubs: every method, same rule</h3>${barsHTML(rows(kk).map(s => ({ label: s.method.replace('Top by ', 'Top ' + kk + ' by ').replace('(origin trips)', '').replace('Optimal (Model A, MILP = brute force)', 'Model A (best set)'), v: s.coverage, color: s.method.startsWith('Optimal') ? '#FFB547' : s.method === 'Greedy' ? '#A3E635' : '#7F9AAE' })))}</div>`).join('')}</div>
+    el.innerHTML = `<div class="grid2">${[3, 2].map(kk => `<div class="stack"><h3>${kk} hubs: every method, same rule</h3>${barsHTML(rows(kk).map(s => ({ label: s.method.replace('Top by ', 'Top ' + kk + ' by ').replace('(origin trips)', '').replace('Optimal (Model A, MILP = brute force)', 'Model A (best set)'), v: s.coverage, color: s.method.startsWith('Optimal') ? C.amber : s.method === 'Greedy' ? C.lime : C.flow })))}</div>`).join('')}</div>
       ${table(['Method (3 hubs)', 'Hubs', 'Reached together', 'Sum when counted one by one'], rows(3).filter(s => s.hubs).map(s => [s.method, s.hubs, pct(s.coverage), s.sum_of_singles ? pct(s.sum_of_singles) : '–']), [2, 3])}
       ${what(`Picking hubs is a seed-selection problem (Chapter 10): each hub "reaches" provinces within the radius. Rankings fail because high-ranked provinces sit near each other: counted one by one they add up to far more than they reach together. Greedy adds the best next hub each time and gets close; the optimiser compares whole sets and does ${F.gain_greedy} points better.`, 'results/seeding.csv')}`;
   } else if (k === 'sure') {
@@ -761,7 +777,7 @@ function findingsBody() {
       ${what('These five questions walk several steps through the graph (hub → pickup province → destination → hub), which is what a graph database is for. The same answers come from Freight_GraphDB_Neo4j.ipynb; totals match the notebook exactly.', 'Freight_GraphDB_Neo4j.ipynb')}</div></div>`;
   } else if (k === 'ab') {
     const a = Calc.groupCoverage(DATA.models.A_3, W, A, nodes.map(n => n.g)), b = Calc.groupCoverage(DATA.models['B_3_0.5'], W, A, nodes.map(n => n.g));
-    el.innerHTML = `<div class="grid2"><div class="stack"><h3>Reach in each market group</h3>${DATA.groups.map((g, i) => `<div><div class="note">${g}</div>${barsHTML([{ label: 'Model A', v: a[i], color: '#37E2D5' }, { label: 'Model B', v: b[i], color: '#FFB547' }], 100, 50)}</div>`).join('')}</div>
+    el.innerHTML = `<div class="grid2"><div class="stack"><h3>Reach in each market group</h3>${DATA.groups.map((g, i) => `<div><div class="note">${g}</div>${barsHTML([{ label: 'Model A', v: a[i], color: C.cyan }, { label: 'Model B', v: b[i], color: C.amber }], 100, 50)}</div>`).join('')}</div>
       <div class="stack">${table(['3 hubs', 'Model A', 'Model B'], [['Hubs', hubNames(DATA.models.A_3), hubNames(DATA.models['B_3_0.5'])], ['All trips reached', F.A3, F.B3], ['Weakest group', F.weak_A, F.weak_B], ['Works with 2 hubs', 'Yes', 'No'], ['Return loads', F.lane_A3, pct(DATA.lane.find(l => l.set === 'B_3_0.5').lane_coverage)], ['Decision', 'Main case', 'Option']])}
       ${what(`Model B adds one rule: every market group gets at least 50% of its trips within reach. West & South rises from ${F.ws_A} to ${F.ws_B}; total reach falls ${F.B_cost} points. We pick A because no contract or policy requires every region yet. These bars follow the radius and goods set in the planner.`, 'results/community_coverage.csv, models.csv')}</div></div>`;
   } else if (k === 'method') {
@@ -795,7 +811,7 @@ function tweenTo(el, key, to, f) {
 function tweenNums(scope) { scope.querySelectorAll('[data-v]').forEach(el => tweenTo(el, 'p' + el.dataset.k, +el.dataset.v, el.dataset.f)); }
 function updateKPIs() {
   const m = liveMetrics(), has = S.hubs.length > 0;
-  [['kReach', m.c, 'pct'], ['kMonth', m.perMonth, 'int'], ['kLane', m.l, 'pct']].forEach(([id, v, f]) => { const el = document.getElementById(id); el.classList.toggle('none', !has); if (has) tweenTo(el, id, v, f); else { PREV[id] = 0; el.textContent = S.mode === 'explore' ? 'pick hubs' : '–'; } });
+  [['kReach', m.c, 'pct'], ['kMonth', m.perMonth, 'int'], ['kLane', m.l, 'pct']].forEach(([id, v, f]) => { const el = document.getElementById(id); el.classList.toggle('none', !has); if (has) tweenTo(el, id, v, f); else { d3.select(el).interrupt(); PREV[id] = 0; el.textContent = S.mode === 'explore' ? 'pick hubs' : '–'; } });
 }
 function render() {
   syncControls(); drawMap(); writeHash();
@@ -806,6 +822,11 @@ function render() {
 }
 document.getElementById('modeStory').onclick = () => { S.mode = 'story'; goStep(S.step); };
 document.getElementById('resetView').onclick = () => frame(S.mode === 'story' ? camFor(S.step) : null);
+document.getElementById('theme').onclick = () => {
+  const t = document.documentElement.classList.contains('theme-freight') ? 'ocean' : 'freight';
+  try { localStorage.setItem('explorerTheme', t); } catch (e) {}
+  document.documentElement.classList.toggle('theme-freight', t === 'freight'); writeHash(); location.reload();  // the hash keeps the current view across the reload
+};
 document.getElementById('lang').onclick = () => { S.lang = S.lang === 'en' ? 'th' : 'en'; render(); };
 document.getElementById('panel').addEventListener('toggle', e => { if (e.target.matches('details.settings')) S.settingsOpen = e.target.open; }, true);
 svg.on('pointerdown.tip', e => { if (e.target.tagName !== 'circle') tipEl.hidden = true; });
@@ -814,6 +835,7 @@ if (innerWidth <= 600) document.getElementById('mapopts').open = false;
 function writeHash() {
   const q = S.mode === 'story' ? { step: S.step + 1 } : { mode: 'explore', hubs: S.hubs.join(','), r: S.radius, by: S.measure, goods: S.prod.map(Number).join(''), ...(S.pin ? { pin: S.pin.join(',') } : {}) };
   if (S.lang === 'th') q.lang = 'th';
+  if (!document.documentElement.classList.contains('theme-freight')) q.theme = 'ocean';
   history.replaceState(null, '', '#' + new URLSearchParams(q));
 }
 function readHash() {
